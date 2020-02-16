@@ -1,0 +1,36 @@
+{
+  "playlists": [
+    {
+      "name": "crimson",
+      "filePath": "E:\\src\\playgen\\playlists\\crimson-playlist.txt",
+      "description": "Crimson Blues and solo works by Mark 'Mississippi Slide' Jeghers",
+      "redundantTitleThreshold": 20,
+      "partialTitleDelimiters": "(,/",
+      "redundantArtistThreshold": 0
+    },
+    {
+      "name": "johnson",
+      "filePath": "E:\\src\\playgen\\playlists\\johnson-playlist.txt",
+      "description": "Songs by Robert Johnson",
+      "redundantTitleThreshold": 0,
+      "partialTitleDelimiters": "",
+      "redundantArtistThreshold": 0
+    },
+    {
+      "name": "retro",
+      "filePath": "E:\\src\\playgen\\playlists\\retro-playlist.txt",
+      "description": "Retro Blues songs from pre-War years",
+      "redundantTitleThreshold": 10,
+      "partialTitleDelimiters": "",
+      "redundantArtistThreshold": 4
+    },
+    {
+      "name": "jingles",
+      "filePath": "E:\\src\\playgen\\playlists\\jingles-playlist.txt",
+      "description": "All of the jingles",
+      "redundantTitleThreshold": 0,
+      "partialTitleDelimiters": "",
+      "redundantArtistThreshold": 0
+    }
+  ]
+}

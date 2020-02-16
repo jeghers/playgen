@@ -1,0 +1,53 @@
+CREATE TABLE `playlists` (
+    `name` varchar(32) NOT NULL DEFAULT '',
+    `filePath` varchar(512) DEFAULT NULL,
+    `description` varchar(128) DEFAULT NULL,
+    `redundantTitleThreshold` int(10) unsigned DEFAULT NULL,
+    `partialTitleDelimiters` varchar(16) DEFAULT NULL,
+    `redundantArtistThreshold` int(10) unsigned DEFAULT NULL,
+    PRIMARY KEY (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+GET http://localhost:3000/api/playlists
+HEAD http://localhost:3000/api/playlists
+POST http://localhost:3000/api/playlists
+{
+	"name": "sample",
+	"filePath": "D:\\src\\playgen\\playlists\\johnson-playlist.txt",
+	"description": "Test entry",
+	"partialTitleDelimiters": "(,/"
+}
+OPTIONS http://localhost:3000/api/playlists
+
+GET http://localhost:3000/api/playlists/sample
+HEAD http://localhost:3000/api/playlists/sample
+PUT http://localhost:3000/api/playlists/sample
+{
+	"name": "sample",
+	"filePath": "D:\\src\\playgen\\playlists\\retro-playlist.txt",
+	"description": "Test entry (modified)",
+	"partialTitleDelimiters": "/(,",
+	"redundantArtistThreshold": 5
+}
+PATCH http://localhost:3000/api/playlists/sample
+{
+	"description": "Test entry (modified again)",
+	"redundantTitleThreshold": 10
+}
+DELETE http://localhost:3000/api/playlists/sample
+OPTIONS http://localhost:3000/api/playlists/sample
+
+GET http://localhost:3000/api/playlists/crimson/songs
+HEAD http://localhost:3000/api/playlists/crimson/songs
+OPTIONS http://localhost:3000/api/playlists/crimson/songs
+GET http://localhost:3000/api/playlists/crimson/songs/2
+OPTIONS http://localhost:3000/api/playlists/crimson/songs/2
+GET http://localhost:3000/api/playlists/crimson/nextsong
+OPTIONS http://localhost:3000/api/playlists/crimson/nextsong
+GET http://localhost:3000/api/playlists/crimson/currentsong
+OPTIONS http://localhost:3000/api/playlists/crimson/currentsong
+GET http://localhost:3000/api/playlists/crimson/history
+HEAD http://localhost:3000/api/playlists/crimson/history
+OPTIONS http://localhost:3000/api/playlists/crimson/history
+GET http://localhost:3000/api/playlists/crimson/history/2
+OPTIONS http://localhost:3000/api/playlists/crimson/history/2
