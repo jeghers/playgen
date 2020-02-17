@@ -35,7 +35,7 @@ The playlist generator has the following features:
 * Edit config/default.js to configure your MySQL database (you can also customize development.js and production.js if desired)
 
 * Create the following table in your MySQL database, using the schema specified in config/default.js
-
+```
 CREATE TABLE 'playlists' (
     'name' varchar(32) NOT NULL DEFAULT '',
     'filePath' varchar(512) DEFAULT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE 'playlists' (
     'redundantArtistThreshold' int(10) unsigned DEFAULT NULL,
     PRIMARY KEY ('name')
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
+```
 * Populate the 'playlists' table with details about your desired playlist(s), refer to the "Playlist Configuration" section below for details
 
 * Use npm run start to run the playlist generator service
