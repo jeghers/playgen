@@ -15,7 +15,7 @@ The playlist generator has the following features:
     * Configurable deferral of duplicate song titles
     * Configurable deferral of duplicate song artists
 * Automatic songlist generation for a directory full of song files
-* Uses MySQL to store playlist options (the songs themselves go in text files)
+* Uses MySQL to store playlist options (the songs themselves are listed in text files)
 * Can be made to fall back on JSON text file for playlist options in case DB is not used
 
 ## **Prerequisites**
@@ -23,6 +23,10 @@ The playlist generator has the following features:
 * NodeJS (version 12 recommended)
 
 * MySQL (preferably running on localhost)
+
+## **How the random selection works**
+
+
 
 ## **How to deploy this software**
 
@@ -88,7 +92,7 @@ The following fields are placed in the name of the song file, separated by dashe
 * Record Label
 * Year of Release
 
-For example: your MP3 file contains the song "Pearline" by Son House, from an album "The Original Delta Blues" released by "Columbia Legacy" in 1965:
+For example: your MP3 file contains the song "Pearline" by "Son House", from an album "The Original Delta Blues" released by "Columbia Legacy" in 1965:
 
 	title: Pearline
 	artist: Son House
@@ -96,8 +100,10 @@ For example: your MP3 file contains the song "Pearline" by Son House, from an al
 	label: Columbia Legacy
 	year: 1965
 
-The filename should be: Pearline-Son House-The Original Delta Blues-Columbia Legacy-1965.mp3
-
+The filename should be:
+```
+Pearline-Son House-The Original Delta Blues-Columbia Legacy-1965.mp3
+```
 You'll probably want to make some automated shell script program to take new song files and convert them to this exact filename nomenclature.  That will save you a lot of bother over time.
 
 ## **REST API Reference**

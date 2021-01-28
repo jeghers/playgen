@@ -8,20 +8,20 @@ CREATE TABLE `playlists` (
     PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-GET http://localhost:3000/api/playlists
-HEAD http://localhost:3000/api/playlists
-POST http://localhost:3000/api/playlists
+GET http://localhost:3000/api/v1/playlists
+HEAD http://localhost:3000/api/v1/playlists
+POST http://localhost:3000/api/v1/playlists
 {
 	"name": "sample",
 	"filePath": "D:\\src\\playgen\\playlists\\johnson-playlist.txt",
 	"description": "Test entry",
 	"partialTitleDelimiters": "(,/"
 }
-OPTIONS http://localhost:3000/api/playlists
+OPTIONS http://localhost:3000/api/v1/playlists
 
-GET http://localhost:3000/api/playlists/sample
-HEAD http://localhost:3000/api/playlists/sample
-PUT http://localhost:3000/api/playlists/sample
+GET http://localhost:3000/api/v1/playlists/sample
+HEAD http://localhost:3000/api/v1/playlists/sample
+PUT http://localhost:3000/api/v1/playlists/sample
 {
 	"name": "sample",
 	"filePath": "D:\\src\\playgen\\playlists\\retro-playlist.txt",
@@ -29,25 +29,25 @@ PUT http://localhost:3000/api/playlists/sample
 	"partialTitleDelimiters": "/(,",
 	"redundantArtistThreshold": 5
 }
-PATCH http://localhost:3000/api/playlists/sample
+PATCH http://localhost:3000/api/v1/playlists/sample
 {
 	"description": "Test entry (modified again)",
 	"redundantTitleThreshold": 10
 }
-DELETE http://localhost:3000/api/playlists/sample
-OPTIONS http://localhost:3000/api/playlists/sample
+DELETE http://localhost:3000/api/v1/playlists/sample
+OPTIONS http://localhost:3000/api/v1/playlists/sample
 
-GET http://localhost:3000/api/playlists/crimson/songs
-HEAD http://localhost:3000/api/playlists/crimson/songs
-OPTIONS http://localhost:3000/api/playlists/crimson/songs
-GET http://localhost:3000/api/playlists/crimson/songs/2
-OPTIONS http://localhost:3000/api/playlists/crimson/songs/2
-GET http://localhost:3000/api/playlists/crimson/nextsong
-OPTIONS http://localhost:3000/api/playlists/crimson/nextsong
-GET http://localhost:3000/api/playlists/crimson/currentsong
-OPTIONS http://localhost:3000/api/playlists/crimson/currentsong
-GET http://localhost:3000/api/playlists/crimson/history
-HEAD http://localhost:3000/api/playlists/crimson/history
-OPTIONS http://localhost:3000/api/playlists/crimson/history
-GET http://localhost:3000/api/playlists/crimson/history/2
-OPTIONS http://localhost:3000/api/playlists/crimson/history/2
+GET http://localhost:3000/api/v1/playlists/crimson/songs
+HEAD http://localhost:3000/api/v1/playlists/crimson/songs
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/songs
+GET http://localhost:3000/api/v1/playlists/crimson/songs/2
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/songs/2
+GET http://localhost:3000/api/v1/playlists/crimson/nextsong
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/nextsong
+GET http://localhost:3000/api/v1/playlists/crimson/currentsong
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/currentsong
+GET http://localhost:3000/api/v1/playlists/crimson/history
+HEAD http://localhost:3000/api/v1/playlists/crimson/history
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/history
+GET http://localhost:3000/api/v1/playlists/crimson/history/2
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/history/2

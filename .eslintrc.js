@@ -13,11 +13,8 @@ module.exports = {
         ],
         "array-callback-return": "error",
         "array-element-newline": "error",
-        "arrow-body-style": "error",
-        "arrow-parens": [
-            "error",
-            "as-needed"
-        ],
+        "arrow-body-style": "off",
+        "arrow-parens": "off",
         "arrow-spacing": [
             "error",
             {
@@ -35,7 +32,7 @@ module.exports = {
         "camelcase": "error",
         "capitalized-comments": "off",
         "class-methods-use-this": "error",
-        "comma-dangle": "error",
+        "comma-dangle": "off",
         "comma-spacing": "off",
         "comma-style": [
             "error",
@@ -48,7 +45,7 @@ module.exports = {
         ],
         "consistent-return": "error",
         "consistent-this": "off",
-        "curly": "error",
+        "curly": "off",
         "default-case": "error",
         "dot-location": [
             "error",
@@ -61,10 +58,7 @@ module.exports = {
         "func-call-spacing": "error",
         "func-name-matching": "error",
         "func-names": "off",
-        "func-style": [
-            "error",
-            "declaration"
-        ],
+        "func-style": "off",
         "function-paren-newline": "off",
         "generator-star-spacing": "error",
         "getter-return": "error",
@@ -91,10 +85,7 @@ module.exports = {
             }
         ],
         "line-comment-position": "off",
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
+        "linebreak-style": "off",
         "lines-around-comment": "off",
         "lines-around-directive": "error",
         "lines-between-class-members": "error",
@@ -214,7 +205,7 @@ module.exports = {
         "no-whitespace-before-property": "error",
         "no-with": "error",
         "nonblock-statement-body-position": "error",
-        "object-curly-newline": "error",
+        "object-curly-newline": "off",
         "object-curly-spacing": [
             "error",
             "always"
