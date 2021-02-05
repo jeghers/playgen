@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql8');
 
 const Playlist = require('./Playlist');
 const { watchPromise } = require('./utils');
