@@ -42,6 +42,15 @@ HEAD http://localhost:3000/api/v1/playlists/crimson/songs
 OPTIONS http://localhost:3000/api/v1/playlists/crimson/songs
 GET http://localhost:3000/api/v1/playlists/crimson/songs/2
 OPTIONS http://localhost:3000/api/v1/playlists/crimson/songs/2
+POST http://localhost:3000/api/v1/playlists/crimson/requests
+{
+    "songIndex": 45
+}
+GET http://localhost:3000/api/v1/playlists/crimson/requests
+HEAD http://localhost:3000/api/v1/playlists/crimson/requests
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/requests
+GET http://localhost:3000/api/v1/playlists/crimson/requests/2
+DELETE http://localhost:3000/api/v1/playlists/crimson/requests/2
 GET http://localhost:3000/api/v1/playlists/crimson/nextsong
 OPTIONS http://localhost:3000/api/v1/playlists/crimson/nextsong
 GET http://localhost:3000/api/v1/playlists/crimson/currentsong

@@ -42,7 +42,7 @@ router.get('/', (req, res /* , next */) => {
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
               'Playlist ' + playlistId + ' has no songs loaded');
             return;
           }

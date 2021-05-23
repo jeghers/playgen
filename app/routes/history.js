@@ -42,7 +42,7 @@ router.get('/', (req, res /* , next */) => {
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
               'Playlist ' + playlistId + ' has no songs loaded');
             return;
           }
@@ -113,7 +113,7 @@ router.head('/', (req, res /* , next */) => {
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
               'Playlist ' + playlistId + ' has no songs loaded');
             return;
           }
@@ -130,7 +130,7 @@ router.head('/', (req, res /* , next */) => {
           if (length) {
             history = history.slice(0, length);
           }
-          const count = history.length; // playlist._songsToPlay.length;
+          const count = history.length;
           res.status(httpStatus.OK);
           if (start) {
             res.header('X-Start', `${start}`);
@@ -185,13 +185,13 @@ router.get('/:song_index', (req, res /* , next */) => {
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
               'Playlist ' + playlistId + ' has no songs loaded');
             return;
           }
           const history = playlist._getSongHistory();
           if (history === null) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
               'Playlist ' + playlistId + ' has no song history yet');
             return;
           }

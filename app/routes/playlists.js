@@ -265,7 +265,8 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     if (data.filePath !== req.body.filePath) {
       fileChanged = true;
     }
-  } else {
+  }
+  else {
     allValidFields = false;
   }
   if (req.body.description) {
@@ -274,7 +275,8 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     updateParams.push(req.body.description);
     dataCopy.description = req.body.description;
     console.log('description = ' + req.body.description);
-  } else {
+  }
+  else {
     allValidFields = false;
   }
   if (!req.body.hasOwnProperty('redundantTitleThreshold')) {
@@ -295,7 +297,8 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     dataCopy.partialTitleDelimiters = req.body.partialTitleDelimiters;
     console.log('partialTitleDelimiters = ' + req.body.partialTitleDelimiters);
     someRedundantThresholdChanged = true;
-  } else {
+  }
+  else {
     allValidFields = false;
   }
   if (!req.body.hasOwnProperty('redundantArtistThreshold')) {
