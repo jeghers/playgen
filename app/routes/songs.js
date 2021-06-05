@@ -23,7 +23,7 @@ router.get('/', (req, res /* , next */) => {
     [ playlistId ], (err, rows) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error getting playlist ' + playlistId + ' - ' + err);
+          'Error getting playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -34,7 +34,7 @@ router.get('/', (req, res /* , next */) => {
 
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-          'Playlist ' + playlistId + ' not found');
+          'Playlist "' + playlistId + '" not found');
       }
       else {
         console.log(rows[0].name);
@@ -43,7 +43,7 @@ router.get('/', (req, res /* , next */) => {
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
-              'Playlist ' + playlistId + ' has no songs loaded');
+              'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
           let songList = _.cloneDeep(playlist._songsToPlay);
@@ -78,7 +78,7 @@ router.get('/', (req, res /* , next */) => {
         }
         else {
           handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-            'Playlist ' + playlistId + ' is in the DB but not the memory list');
+            'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
     }
@@ -94,7 +94,7 @@ router.head('/', (req, res /* , next */) => {
     [ playlistId ], (err, rows) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error getting playlist ' + playlistId + ' - ' + err);
+          'Error getting playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -105,7 +105,7 @@ router.head('/', (req, res /* , next */) => {
 
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-          'Playlist ' + playlistId + ' not found');
+          'Playlist "' + playlistId + '" not found');
       }
       else {
         console.log(rows[0].name);
@@ -114,7 +114,7 @@ router.head('/', (req, res /* , next */) => {
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
-              'Playlist ' + playlistId + ' has no songs loaded');
+              'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
           console.log('    ' + playlist._songsToPlay.length + ' songs');
@@ -141,7 +141,7 @@ router.head('/', (req, res /* , next */) => {
         }
         else {
           handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-            'Playlist ' + playlistId + ' is in the DB but not the memory list');
+            'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
     }
@@ -166,7 +166,7 @@ router.get('/:song_index', (req, res /* , next */) => {
     [ playlistId ], (err, rows) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error getting playlist ' + playlistId + ' - ' + err);
+          'Error getting playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -177,7 +177,7 @@ router.get('/:song_index', (req, res /* , next */) => {
 
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-          'Playlist ' + playlistId + ' not found');
+          'Playlist "' + playlistId + '" not found');
       }
       else {
         console.log(rows[0].name);
@@ -186,14 +186,14 @@ router.get('/:song_index', (req, res /* , next */) => {
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
-              'Playlist ' + playlistId + ' has no songs loaded');
+              'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
           console.log('    ' + playlist.count() + ' songs');
           const count = playlist.count();
           if (req.params.song_index >= count) {
             handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-              'Playlist ' + playlistId + ' only has ' + count + ' songs');
+              'Playlist "' + playlistId + '" only has ' + count + ' songs');
             return;
           }
           const song = _.cloneDeep(playlist._songsToPlay[req.params.song_index]);
@@ -205,7 +205,7 @@ router.get('/:song_index', (req, res /* , next */) => {
         }
         else {
           handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-            'Playlist ' + playlistId + ' is in the DB but not the memory list');
+            'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
     }

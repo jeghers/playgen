@@ -141,7 +141,7 @@ router.post('/', (req, res /* , next */) => {
       const uri = `${fullUrl}/${name}`;
       res.status(httpStatus.CREATED);
       res.set('Location', uri);
-      res.json({ status: 'OK', uri, message: 'Playlist ' + name + ' created' });
+      res.json({ status: 'OK', uri, message: 'Playlist "' + name + '" created' });
     });
 });
 
@@ -163,7 +163,7 @@ router.get('/:playlist_id', (req, res /* , next */) => {
     [ playlistId ], (err, rows) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error fetching playlist ' + playlistId + ' - ' + err);
+          'Error fetching playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -174,7 +174,7 @@ router.get('/:playlist_id', (req, res /* , next */) => {
 
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-          'Playlist ' + playlistId + ' not found');
+          'Playlist "' + playlistId + '" not found');
       }
       else {
         console.log(rows[0].name);
@@ -205,7 +205,7 @@ router.head('/:playlist_id', (req, res /* , next */) => {
     [ playlistId ], (err, rows) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error fetching playlist ' + playlistId + ' - ' + err);
+          'Error fetching playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -216,7 +216,7 @@ router.head('/:playlist_id', (req, res /* , next */) => {
 
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-          'Playlist ' + playlistId + ' not found');
+          'Playlist "' + playlistId + '" not found');
       }
       else {
         console.log(rows[0].name);
@@ -248,7 +248,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   const data = playlists[playlistId];
   if (!data) {
     handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-      'Playlist ' + playlistId + ' not found');
+      'Playlist "' + playlistId + '" not found');
     return;
   }
   const dataCopy = new Playlist(data);
@@ -315,7 +315,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
 
   if (!allValidFields) {
     handleError(res, httpStatus.BAD_REQUEST, 'ERROR',
-      'Error updating playlist ' + playlistId + ' - not enough valid fields given');
+      'Error updating playlist "' + playlistId + '" - not enough valid fields given');
     return;
   }
 
@@ -328,7 +328,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     (err, result) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error updating playlist ' + playlistId + ' - ' + err);
+          'Error updating playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -346,7 +346,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
       console.log('Global playlists:');
       console.log(playlists);
       res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist ' + playlistId + ' updated' });
+      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
     }
   );
 });
@@ -361,7 +361,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
   const data = playlists[playlistId];
   if (!data) {
     handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
-      'Playlist ' + playlistId + ' not found');
+      'Playlist "' + playlistId + '" not found');
     return;
   }
   const dataCopy = new Playlist(data);
@@ -418,7 +418,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
 
   if (!someValidFields) {
     handleError(res, httpStatus.BAD_REQUEST, 'ERROR',
-      'Error updating playlist ' + playlistId + ' - no valid fields given');
+      'Error updating playlist "' + playlistId + '" - no valid fields given');
     return;
   }
 
@@ -431,7 +431,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
     (err, result) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error updating playlist ' + playlistId + ' - ' + err);
+          'Error updating playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -449,7 +449,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
       console.log('Global playlists:');
       console.log(playlists);
       res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist ' + playlistId + ' updated' });
+      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
     }
   );
 });
@@ -464,7 +464,7 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
     [ playlistId ], (err, result) => {
       if (err) {
         handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
-          'Error deleting playlist ' + playlistId + ' - ' + err);
+          'Error deleting playlist "' + playlistId + '" - ' + err);
         console.log('Reconnecting to DB...');
         dbInit();
         return;
@@ -472,7 +472,7 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
 
       if (result.affectedRows === 0) {
         res.status(httpStatus.NOT_FOUND);
-        res.json({ status: 'NOTFOUND', message: 'Playlist ' + playlistId + ' not found' });
+        res.json({ status: 'NOTFOUND', message: 'Playlist "' + playlistId + '" not found' });
         return;
       }
       console.log('Deleted ' + result.affectedRows + ' rows');
@@ -480,7 +480,7 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
       console.log('Global playlists:');
       console.log(playlists);
       res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist ' + playlistId + ' deleted' });
+      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" deleted' });
     }
   );
 });

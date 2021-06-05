@@ -78,7 +78,7 @@ class Playlist {
             }
           });
         }
-        console.log('Playlist ' + thisPlaylist.name + ' song file ' +
+        console.log('Playlist "' + thisPlaylist.name + '" song file ' +
           thisPlaylist.filePath + ' DOES exist and is readable');
         return new Promise((resolve, reject) => {
           const fileInput = fs.createReadStream(thisPlaylist.filePath);
@@ -86,14 +86,14 @@ class Playlist {
         });
       }
       catch (err) {
-        console.log('Playlist ' + thisPlaylist.name + ' song file ' +
+        console.log('Playlist "' + thisPlaylist.name + '" song file ' +
           thisPlaylist.filePath +
           ' DOES NOT exist or is not readable');
         return null;
       }
     }
     else {
-      console.log('Playlist ' + thisPlaylist.name + ' has no file to load');
+      console.log('Playlist "' + thisPlaylist.name + '" has no file to load');
       return null;
     }
   }
@@ -127,8 +127,7 @@ class Playlist {
           thisPlaylist._buildRandomIndex();
           thisPlaylist._clearSongHistory();
         }
-        /*console.log('Playlist ' + thisPlaylist.name +
-                    ' song count is ' + thisPlaylist._songCount);*/
+        /*console.log('Playlist "' + thisPlaylist.name + '" song count is ' + thisPlaylist._songCount);*/
         resolve(thisPlaylist);
       }
     });
