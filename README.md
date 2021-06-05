@@ -261,7 +261,7 @@ output.icecast(
 Given: a host named `somehost` and port `3000`.
 
 ### Playlists
-####GET http://somehost:3000/api/v1/playlists
+#### GET http://somehost:3000/api/v1/playlists
 
 * Returns a list of all playlists 
 
@@ -296,7 +296,7 @@ _Sample response body_
 }
 ```
 
-####HEAD http://somehost:3000/api/v1/playlists
+#### HEAD http://somehost:3000/api/v1/playlists
 
 * Returns metadata for the collection of playlists
 
@@ -307,7 +307,7 @@ _Sample response headers_
 "Content-Length": "1759"
 ```
 
-####POST http://somehost:3000/api/v1/playlists
+#### POST http://somehost:3000/api/v1/playlists
 
 * Creates a new playlist
 
@@ -330,7 +330,7 @@ _Sample response body_
 }
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists
+#### OPTIONS http://somehost:3000/api/v1/playlists
 
 * Returns the supported command verbs for playlists
 
@@ -339,7 +339,7 @@ _Sample response headers_
 "Allow": "GET,HEAD,POST"
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}
+#### GET http://somehost:3000/api/v1/playlists/{playlist}
 
 * Returns info about the specified playlist (except for song details)
 
@@ -359,7 +359,7 @@ _Sample response body_
 }
 ```
 
-####HEAD http://somehost:3000/api/v1/playlists/{playlist}
+#### HEAD http://somehost:3000/api/v1/playlists/{playlist}
 
 * Returns metadata for the specified playlist
 
@@ -370,7 +370,7 @@ _Sample response headers_
 "Content-Length": "250"
 ```
 
-####PUT http://somehost:3000/api/v1/playlists/{playlist}
+#### PUT http://somehost:3000/api/v1/playlists/{playlist}
 
 * Commits a complete update of the playlist data (except for song details).
 Any fields not given will be cleared.
@@ -393,7 +393,7 @@ _Sample response body_
 }
 ```
 
-####PATCH http://somehost:3000/api/v1/playlists/{playlist}
+#### PATCH http://somehost:3000/api/v1/playlists/{playlist}
 
 * Commits a partial update of the playlist data (except for song details).
 Any fields not given will be left unchanged.
@@ -413,7 +413,7 @@ _Sample response body_
 }
 ```
 
-####DELETE http://somehost:3000/api/v1/playlists/{playlist}
+#### DELETE http://somehost:3000/api/v1/playlists/{playlist}
 
 * Deletes the specified playlist (the song files are unaffected and not removed)
 
@@ -425,7 +425,7 @@ _Sample response body_
 }
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}
 
 * Returns the supported command verbs for the specified playlist
 
@@ -436,7 +436,7 @@ _Sample response headers_
 
 ### Songs within a playlist
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/songs
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/songs
 
 * Returns a list of all the songs in the specified playlist
 
@@ -474,7 +474,7 @@ _Sample response body_
 }
 ```
 
-####HEAD http://somehost:3000/api/v1/playlists/{playlist}/songs
+#### HEAD http://somehost:3000/api/v1/playlists/{playlist}/songs
 
 * Returns metadata for the songs in the specified playlist
 
@@ -486,7 +486,7 @@ _Sample response headers_
 "Content-Length": "61418"
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/songs
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/songs
 
 * Returns the supported command verbs for the songs in the specified playlist
 
@@ -495,7 +495,7 @@ _Sample response headers_
 "Allow": "GET,HEAD"
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/songs/{songIndex}
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/songs/{songIndex}
 
 * Returns a specified song in the specified playlist
 
@@ -516,7 +516,7 @@ _Sample response body_
 }
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/songs/{songIndex}
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/songs/{songIndex}
 
 * Returns the supported command verbs for a specified song in the specified
 playlist
@@ -528,7 +528,7 @@ _Sample response headers_
 
 ### Song requests within a playlist
 
-####POST http://somehost:3000/api/v1/playlists/{playlist}/requests
+#### POST http://somehost:3000/api/v1/playlists/{playlist}/requests
 
 * Creates a new song request for the specified playlist
 
@@ -556,7 +556,7 @@ _Sample response body_
 }
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/requests
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/requests
 
 * Returns a list of all the song requests for the specified playlist
 
@@ -602,7 +602,7 @@ _Sample response body_
 }
 ```
 
-####HEAD http://somehost:3000/api/v1/playlists/{playlist}/requests
+#### HEAD http://somehost:3000/api/v1/playlists/{playlist}/requests
 
 * Returns metadata for the song requests for the specified playlist
 
@@ -613,7 +613,7 @@ _Sample response headers_
 "Content-Length": "1242"
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/requests
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/requests
 
 * Returns the supported command verbs for the song requests for the
 specified playlist
@@ -623,7 +623,7 @@ _Sample response headers_
 "Allow": "POST,GET,HEAD"
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/requests/{requestIndex}
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/requests/{requestIndex}
 
 * Returns the specified song request for the specified playlist
 
@@ -649,7 +649,7 @@ _Sample response body_
 }
 ```
 
-####DELETE http://somehost:3000/api/v1/playlists/{playlist}/requests/{requestIndex}
+#### DELETE http://somehost:3000/api/v1/playlists/{playlist}/requests/{requestIndex}
 
 * Deletes the specified song request for the specified playlist
 
@@ -662,7 +662,7 @@ _Sample response body_
 ```
 ### Next/current song in a playlist
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/nextsong
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/nextsong
 
 * Returns the next song selection for the specified playlist.  The song
 selection will either be a randomly-generated song selection, or, if the
@@ -702,7 +702,7 @@ While JSON is normally the best format most of the time, simple text is
 quite handy for returning data to Liquidsoap (see the example above).  The
 simple text option is only provided for this one API endpoint.
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/nextsong
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/nextsong
 
 * Returns the supported command verbs for the next song selection
 
@@ -711,7 +711,7 @@ _Sample response headers_
 "Allow": "GET"
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/currentsong
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/currentsong
 
 * Returns the latest song selection for the specified playlist.  This does
 not cause any new song selection to occur, it simply reports what the most
@@ -738,7 +738,7 @@ _Sample response body_
 }
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/currentsong
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/currentsong
 
 * Returns the supported command verbs for the current song selection
 
@@ -749,7 +749,7 @@ _Sample response headers_
 
 ### Song history within a playlist
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/history
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/history
 
 * Returns the history list of all the songs selected for the specified playlist.
 The history list remembers all songs selected or requested for this playlist
@@ -802,7 +802,7 @@ _Sample response body_
 }
 ```
 
-####HEAD http://somehost:3000/api/v1/playlists/{playlist}/history
+#### HEAD http://somehost:3000/api/v1/playlists/{playlist}/history
 
 * Returns metadata for the history of all the songs selected for the
 specified playlist
@@ -815,7 +815,7 @@ _Sample response headers_
 "Content-Length": "217640"
 ```
 
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/history
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/history
 
 * Returns the supported command verbs for the history list for the specified
 playlist
@@ -825,7 +825,7 @@ _Sample response headers_
 "Allow": "GET,HEAD"
 ```
 
-####GET http://somehost:3000/api/v1/playlists/{playlist}/history/{songIndex}
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/history/{songIndex}
 
 * Returns the specified song in the history list for the specified playlist
 
@@ -850,7 +850,7 @@ _Sample response body_
   }
 }
 ```
-####OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/history/{songIndex}
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/history/{songIndex}
 
 * Returns the supported command verbs for the specified song in the history list
 for the specified playlist
