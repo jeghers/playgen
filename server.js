@@ -6,12 +6,19 @@ const httpStatus = require('http-status-codes');
 
 const config = require('./app/config');
 const { dbInit } = require('./app/db');
+const { log } = require('./app/utils');
+const {
+  NOOP,
+  ERROR,
+  LOG_LEVEL_INFO,
+} = require('./app/constants');
+
 const port = process.env.PORT || config.session.port; // set our port
 
-console.log('config...');
-console.log(config);
+log(LOG_LEVEL_INFO, 'config...');
+log(LOG_LEVEL_INFO, config);
 
-const app = express();                 // define our app using express
+const app = express(); // define our app using express
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -24,21 +31,19 @@ const defaultRouter = express.Router(); // get an instance of the express Router
 
 // middleware to use for all requests
 defaultRouter.use((req, res, next) => {
-  // do logging
-  console.log('Something is happening.');
   next(); // make sure we go to the next routes and don't stop here
 });
 
 // test route to make sure everything is working
 // (accessed at GET http://localhost:<port>/api)
 defaultRouter.get('/', (req, res) => {
-  res.json({ status: 'NOOP', message: 'Welcome to the \'playgen\' api.' });
+  res.json({ status: NOOP, message: 'Welcome to the \'playgen\' api.' });
 });
 
 // test route to make sure everything is working
 // (accessed at GET http://localhost:<port>/api/v1)
 defaultRouter.get('/v1', (req, res) => {
-  res.json({ status: 'NOOP', message: 'V1 is the current version.' });
+  res.json({ status: NOOP, message: 'V1 is the current version.' });
 });
 
 // register our routes -------------------------------
@@ -65,14 +70,14 @@ app.use((req, res) => {
   // if (/^\/api\/v[02-9a-zA-Z].*$/.test(req.url)) {
   if (/\/api\/v(?!1)/.test(req.url)) {
     res.status(httpStatus.NOT_IMPLEMENTED);
-    res.json({ status: 'ERROR', message: 'Version not supported.' });
+    res.json({ status: ERROR, message: 'Version not supported.' });
     return;
   }
   res.status(httpStatus.NOT_FOUND);
-  res.json({ status: 'ERROR', message: 'Sorry can\'t find that!' });
+  res.json({ status: ERROR, message: 'Sorry can\'t find that!' });
 });
 
 // start the server
 // =============================================================================
 app.listen(port);
-console.log('Listening on port ' + port);
+log(LOG_LEVEL_INFO, 'Listening on port ' + port);

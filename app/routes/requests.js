@@ -7,7 +7,17 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 
 const { dbInit, getDb, playlists } = require('../db');
-const { handleError } = require('../utils');
+const { handleError, log } = require('../utils');
+const {
+  ERROR,
+  NOTFOUND,
+  NOCONTENT,
+  CONFLICT,
+  LOG_LEVEL_DEBUG,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_WARNING,
+  LOG_LEVEL_ERROR,
+} = require('../constants');
 
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
@@ -17,12 +27,12 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // create new request in a given playlist
 // (accessed at POST http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.post('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists called with POST url = ${req.url}`);
-  console.log('req.body...');
-  console.log(req.body);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists called with POST url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, 'req.body...');
+  log(LOG_LEVEL_DEBUG, req.body);
 
   if (!req.body.hasOwnProperty('songIndex')) {
-    handleError(res, httpStatus.BAD_REQUEST, 'ERROR',
+    handleError(res, httpStatus.BAD_REQUEST, ERROR,
       'Error adding song request - no song index given');
     return;
   }
@@ -32,27 +42,26 @@ router.post('/', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           const playlistCount = playlist.count();
           if (songIndex >= playlistCount) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
               'Playlist "' + playlistId + '" only has ' + playlistCount + ' songs');
             return;
           }
@@ -62,7 +71,7 @@ router.post('/', (req, res /* , next */) => {
             const uri = `${fullUrl}/${existingRequestIndex}`;
             res.set('Location', uri);
             const song = playlist._songsToPlay[songIndex];
-            handleError(res, httpStatus.CONFLICT, 'CONFLICT',
+            handleError(res, httpStatus.CONFLICT, CONFLICT,
               'Playlist "' + playlistId + '" already has a request for the song "' + song.title + '"');
             return;
           }
@@ -73,9 +82,8 @@ router.post('/', (req, res /* , next */) => {
           res.set('Location', uri);
           res.status(httpStatus.CREATED);
           res.json({ status: 'OK', totalCount, song, uri: songUri });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -86,27 +94,26 @@ router.post('/', (req, res /* , next */) => {
 // get all the songs in a given playlist
 // (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.get('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests called with GET url = ${req.url}`);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/requests called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._priorityRequests) || (!playlist._fileLoaded)) {
@@ -131,16 +138,15 @@ router.get('/', (req, res /* , next */) => {
               uri,
             });
           }
-          console.log('    ' + count + ' requests');
+          log(LOG_LEVEL_DEBUG, '    ' + count + ' requests');
           res.status(httpStatus.OK);
           res.header('X-Count', `${playlist._priorityRequests.length}`);
           res.json({
             status: 'OK',
             result: { playlist: playlistId, requests: returnList, count }
           });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -151,27 +157,26 @@ router.get('/', (req, res /* , next */) => {
 // get song metadata for a given playlist
 // (accessed at HEAD http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.head('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests called with HEAD url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/requests called with HEAD url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._priorityRequests) || (!playlist._fileLoaded)) {
@@ -182,13 +187,12 @@ router.head('/', (req, res /* , next */) => {
             return;
           }
           const count = playlist._priorityRequests.length;
-          console.log('    ' + count + ' requests');
+          log(LOG_LEVEL_DEBUG, '    ' + count + ' requests');
           res.status(httpStatus.OK);
           res.header('X-Count', `${count}`);
           res.end();
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -199,7 +203,7 @@ router.head('/', (req, res /* , next */) => {
 // return REST options metadata
 // (accessed at OPTIONS http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.options('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests called with OPTIONS url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/requests called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
   res.header('Allow', 'POST,GET,HEAD');
   res.end();
@@ -208,40 +212,39 @@ router.options('/', (req, res /* , next */) => {
 // get song request by index for a given playlist
 // (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/requests/:request_index)
 router.get('/:request_index', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests/:request_index called with GET url = ${req.url}`);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/requests/:request_index called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._priorityRequests)) {
-            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
+            handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
               'Playlist "' + playlistId + '" has no requests loaded');
             return;
           }
           const requestList = playlist._priorityRequests;
           const count = requestList.length;
-          console.log('    ' + count + ' requests');
+          log(LOG_LEVEL_DEBUG, '    ' + count + ' requests');
           const requestIndex = req.params.request_index;
           if (requestIndex >= count) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
               'Playlist "' + playlistId + '" only has ' + count + ' requests');
             return;
           }
@@ -250,8 +253,8 @@ router.get('/:request_index', (req, res /* , next */) => {
           const song = _.cloneDeep(playlist._songsToPlay[songIndex]);
           const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
           const uri = `${fullUrl}/${songIndex}`.replace(`requests/${requestIndex}`, 'songs');
-          console.log('    song... ');
-          console.log(song);
+          log(LOG_LEVEL_DEBUG, '    song... ');
+          log(LOG_LEVEL_DEBUG, song);
           res.json({
             status: 'OK',
             result: {
@@ -262,9 +265,8 @@ router.get('/:request_index', (req, res /* , next */) => {
               uri,
             },
           });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -275,53 +277,51 @@ router.get('/:request_index', (req, res /* , next */) => {
 // delete song request by index for a given playlist
 // (accessed at DELETE http://localhost:<port>/api/v1/playlists/:playlist_id/requests/:request_index)
 router.delete('/:request_index', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests/:request_index called with DELETE url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/requests/:request_index called with DELETE url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._priorityRequests)) {
-            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
+            handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
               'Playlist "' + playlistId + '" has no requests loaded');
             return;
           }
           const requestList = playlist._priorityRequests;
           const count = requestList.length;
-          console.log('    ' + count + ' requests');
+          log(LOG_LEVEL_DEBUG, '    ' + count + ' requests');
           const requestIndex = req.params.request_index;
           if (requestIndex >= count) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
               'Playlist "' + playlistId + '" only has ' + count + ' requests');
             return;
           }
           requestList.splice(requestIndex, 1);
-          console.log('Deleted request ' + requestIndex);
+          log(LOG_LEVEL_DEBUG, 'Deleted request ' + requestIndex);
           res.status(httpStatus.OK);
           res.json({
             status: 'OK',
             message: 'Playlist "' + playlistId + '" song request ' + requestIndex + ' deleted'
           });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -332,7 +332,7 @@ router.delete('/:request_index', (req, res /* , next */) => {
 // return REST options metadata
 // (accessed at OPTIONS http://localhost:<port>/api/v1/playlists/:playlist_id/requests/:request_index)
 router.options('/:playlist_id', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/requests/:request_index called with OPTIONS url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/requests/:request_index called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
   res.header('Allow', 'GET,DELETE');
   res.end();
@@ -344,8 +344,8 @@ router.use((req, res) => {
 
 router.use((error, req, res) => {
   // can this be modularized?
-  console.log('/v1/playlists/:playlist_id/requests had an error');
-  console.error(error.stack);
+  log(LOG_LEVEL_ERROR, '/v1/playlists/:playlist_id/requests had an error');
+  log(LOG_LEVEL_ERROR, error.stack);
   res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something broke!');
 });
 

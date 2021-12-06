@@ -71,7 +71,8 @@
     "http-status-codes": "^1.4.0",
     "lodash": "^4.17.20",
     "mysql": "^2.18.1",
-    "mysql8": "^2.17.3"
+    "mysql8": "^2.17.3",
+    "node-windows": "^1.0.0-beta.6"
   },
   "devDependencies": {
     "cross-env": "^5.2.1",

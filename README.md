@@ -1,8 +1,8 @@
 # playgen
-### A playlist generator for streaming services like liquidsoap
+### A playlist generator for streaming services like Liquidsoap
 
 This background data service generates automatically randomized playlists.
-I've been using it with liquidsoap for several years now.
+I've been using it with Liquidsoap for several years now.
  
 The playlist generator has the following features:
 
@@ -12,7 +12,7 @@ The playlist generator has the following features:
 * Can be accessed programmatically with HTTP requests (including with 'curl')
 * Supports multiple playlists (e.g. for multiple program streams)
 * Randomizes song playback with advanced features
-    * Optimize randomization logic to insure maximum "fairness"
+    * Optimized randomization logic to insure maximum "fairness"
     * No song ever repeated until complete song list is gone through
     * Configurable deferral of duplicate song titles
     * Configurable deferral of duplicate song artists
@@ -125,8 +125,8 @@ often).
       'filePath' varchar(512) DEFAULT NULL,
       'description' varchar(128) DEFAULT NULL,
       'redundantTitleThreshold' int(10) unsigned DEFAULT NULL,
-      'partialTitleDelimiters' varchar(16) DEFAULT NULL,
       'redundantArtistThreshold' int(10) unsigned DEFAULT NULL,
+      'partialTitleDelimiters' varchar(16) DEFAULT NULL,
       PRIMARY KEY ('name')
   ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 ```
@@ -164,14 +164,14 @@ that playlist.  The following columns are required in each row:
 * redundantTitleThreshold: the number of songs selected before another song
   with an identical name is allowed, unused if set to 0
 
+* redundantArtistThreshold: the number of songs selected before another
+  song with an identical artist is allowed, unused if set to 0
 * partialTitleDelimiters: a collection of characters that will be treated
   as delimiters when comparing for duplicate titles.  For example, if set to
-  "(,", the the titles "Sing Along", "Sing Along (live)", and "Sing Along,
+  "(,", then the titles "Sing Along", "Sing Along (live)", and "Sing Along,
   Sing With Me (medley)" would all be treated as identical titles because
   their first delimited sections are identical.
 
-* redundantArtistThreshold: the number of songs selected before another
-song with an identical artist is allowed, unused if set to 0
 
 ## **Playlist Filenames**
 

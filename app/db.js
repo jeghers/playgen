@@ -1,8 +1,13 @@
 const mysql = require('mysql8');
 
 const Playlist = require('./Playlist');
-const { watchPromise } = require('./utils');
+const { watchPromise, log } = require('./utils');
 const config = require('./config');
+const {
+  LOG_LEVEL_DEBUG,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_ERROR,
+} = require('./constants');
 
 let db = null;
 const playlists = {};
@@ -13,7 +18,6 @@ const sleep = (ms) => {
 
 const dbInit = () => {
 
-  console.log('**************** new dbInit');
   // First you need to create a connection to the db
   db = mysql.createConnection({
     host: config.db.host,
@@ -24,14 +28,14 @@ const dbInit = () => {
 
   db.connect((err) => {
     if (err) {
-      console.log('Error connecting to DB - ' + err);
+      log(LOG_LEVEL_ERROR, `Error connecting to DB - ${err}`);
       return;
     }
-    console.log('Connection established');
+    log(LOG_LEVEL_INFO, 'Connection established');
   });
   // If you're also serving http, display a 503 error.
   db.on('error', (err) => {
-    console.log('DB error', err);
+    log(LOG_LEVEL_ERROR, `DB error - ${err}`);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
       sleep(config.db.reconnectTime).then(() => {  // lost due to either server restart, or a
         dbInit();                                  // connection idle timeout (the wait_timeout
@@ -44,7 +48,7 @@ const dbInit = () => {
   db.query('SELECT * FROM playlists', (err, rows) => {
     if (err) {
       // no initial data
-      console.log('Error querying initial playlists - ' + err);
+      log(LOG_LEVEL_ERROR, `Error querying initial playlists - ${err}`);
       sleep(config.db.reconnectTime).then(() => {
         db.end((/* err */) => {
           // The connection is terminated now
@@ -54,8 +58,8 @@ const dbInit = () => {
       return;
     }
 
-    //console.log('Data received from DB:');
-    //console.log(rows);
+    // log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+    // log(LOG_LEVEL_DEBUG, rows);
 
     /* eslint-disable no-warning-comments */
     if (rows && rows.length) {
@@ -67,19 +71,19 @@ const dbInit = () => {
         playlists[playlist.name] = playlist;
       }
     }
-    console.log('Global playlists:');
-    console.log(playlists);
+    log(LOG_LEVEL_DEBUG, 'Global playlists:');
+    log(LOG_LEVEL_DEBUG, playlists);
   });
 
-  /*db.end((err) => {
+  /* db.end((err) => {
       // The connection is terminated gracefully
       // Ensures all previously enqueued queries are still
       // before sending a COM_QUIT packet to the MySQL server.
-  });*/
+  }); */
 };
 
 module.exports = {
-  dbInit: dbInit,
+  dbInit,
   getDb: () => db,
-  playlists: playlists,
+  playlists,
 };

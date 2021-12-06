@@ -7,7 +7,16 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 
 const { dbInit, getDb, playlists } = require('../db');
-const { handleError } = require('../utils');
+const { handleError, log } = require('../utils');
+const {
+  ERROR,
+  NOTFOUND,
+  NOCONTENT,
+  LOG_LEVEL_DEBUG,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_WARNING,
+  LOG_LEVEL_ERROR,
+} = require('../constants');
 
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
@@ -17,41 +26,39 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // get all the songs in a given playlist
 // (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/songs)
 router.get('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/songs called with GET url = ${req.url}`);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/songs called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
-
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
+            handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
               'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
           let songList = _.cloneDeep(playlist._songsToPlay);
-          console.log('Query string...');
-          console.log(req.query);
+          log(LOG_LEVEL_DEBUG, 'Query string...');
+          log(LOG_LEVEL_DEBUG, req.query);
           const { start, length } = req.query;
-          console.log('Query string for start = ' + start);
-          console.log('Query string for length = ' + length);
+          log(LOG_LEVEL_DEBUG, 'Query string for start = ' + start);
+          log(LOG_LEVEL_DEBUG, 'Query string for length = ' + length);
           if (start) {
             songList = songList.slice(start);
           }
@@ -63,7 +70,7 @@ router.get('/', (req, res /* , next */) => {
             const o = songList[i];
             o.uri = `${fullUrl}/${i}`;
           }
-          console.log('    ' + playlist.count() + ' songs');
+          log(LOG_LEVEL_DEBUG, '    ' + playlist.count() + ' songs');
           const count = songList.length;
           res.status(httpStatus.OK);
           if (start) {
@@ -75,9 +82,8 @@ router.get('/', (req, res /* , next */) => {
             status: 'OK',
             result: { playlist: playlistId, songs: songList, count }
           });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -88,42 +94,40 @@ router.get('/', (req, res /* , next */) => {
 // get song metadata for a given playlist
 // (accessed at HEAD http://localhost:<port>/api/v1/playlists/:playlist_id/songs)
 router.head('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/songs called with HEAD url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/songs called with HEAD url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
-
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
+            handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
               'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
-          console.log('    ' + playlist._songsToPlay.length + ' songs');
+          log(LOG_LEVEL_DEBUG, '    ' + playlist._songsToPlay.length + ' songs');
           let songList = _.clone(playlist._songsToPlay);
-          console.log('Query string...');
-          console.log(req.query);
+          log(LOG_LEVEL_DEBUG, 'Query string...');
+          log(LOG_LEVEL_DEBUG, req.query);
           const { start, length } = req.query;
-          console.log('Query string for start = ' + start);
-          console.log('Query string for length = ' + length);
+          log(LOG_LEVEL_DEBUG, 'Query string for start = ' + start);
+          log(LOG_LEVEL_DEBUG, 'Query string for length = ' + length);
           if (start) {
             songList = songList.slice(start);
           }
@@ -138,9 +142,8 @@ router.head('/', (req, res /* , next */) => {
           res.header('X-Count', `${count}`);
           res.header('X-Total-Count', `${playlist._songsToPlay.length}`);
           res.end();
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -151,7 +154,7 @@ router.head('/', (req, res /* , next */) => {
 // return REST options metadata
 // (accessed at OPTIONS http://localhost:<port>/api/v1/playlists/:playlist_id/songs)
 router.options('/', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/songs called with OPTIONS url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/songs called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
   res.header('Allow', 'GET,HEAD');
   res.end();
@@ -160,51 +163,48 @@ router.options('/', (req, res /* , next */) => {
 // get song by index for a given playlist
 // (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/songs/:song_index)
 router.get('/:song_index', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/songs/:song_index called with GET url = ${req.url}`);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/songs/:song_index called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, 'ERROR',
+        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
           'Error getting playlist "' + playlistId + '" - ' + err);
-        console.log('Reconnecting to DB...');
+        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
         dbInit();
         return;
       }
 
-      console.log('Data received from DB:');
-      console.log(rows);
+      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
+      log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
-      }
-      else {
-        console.log(rows[0].name);
-
+      } else {
+        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
-            handleError(res, httpStatus.NO_CONTENT, 'NOCONTENT',
+            handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
               'Playlist "' + playlistId + '" has no songs loaded');
             return;
           }
-          console.log('    ' + playlist.count() + ' songs');
+          log(LOG_LEVEL_DEBUG, '    ' + playlist.count() + ' songs');
           const count = playlist.count();
           if (req.params.song_index >= count) {
-            handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+            handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
               'Playlist "' + playlistId + '" only has ' + count + ' songs');
             return;
           }
           const song = _.cloneDeep(playlist._songsToPlay[req.params.song_index]);
           song.playlist = playlistId;
-          console.log('    song... ');
-          console.log(song);
+          log(LOG_LEVEL_DEBUG, '    song... ');
+          log(LOG_LEVEL_DEBUG, song);
           delete song['uri'];
           res.json({ status: 'OK', result: song });
-        }
-        else {
-          handleError(res, httpStatus.NOT_FOUND, 'NOTFOUND',
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
             'Playlist "' + playlistId + '" is in the DB but not the memory list');
         }
       }
@@ -215,7 +215,7 @@ router.get('/:song_index', (req, res /* , next */) => {
 // return REST options metadata
 // (accessed at OPTIONS http://localhost:<port>/api/v1/playlists/:playlist_id/songs/:song_index)
 router.options('/:playlist_id', (req, res /* , next */) => {
-  console.log(`/api/v1/playlists/:playlist_id/songs/:song_index called with OPTIONS url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/songs/:song_index called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
   res.header('Allow', 'GET');
   res.end();
@@ -227,8 +227,8 @@ router.use((req, res) => {
 
 router.use((error, req, res) => {
   // can this be modularized?
-  console.log('/v1/playlists/:playlist_id/songs had an error');
-  console.error(error.stack);
+  log(LOG_LEVEL_ERROR, '/v1/playlists/:playlist_id/songs had an error');
+  log(LOG_LEVEL_ERROR, error.stack);
   res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something broke!');
 });
 

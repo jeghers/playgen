@@ -14,5 +14,6 @@ module.exports = {
     songHistoryLimit: 500,
     duplicateReplacementRetries: 10,
   },
-  log: 'info', // use this later
+  log: 'info',
+  isWindowsService: process.env.IS_WINDOWS_SERVICE === 'true',
 };

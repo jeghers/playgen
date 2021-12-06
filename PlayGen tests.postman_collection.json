@@ -1,0 +1,2038 @@
+{
+	"info": {
+		"_postman_id": "3315e860-8636-48e3-9050-a7ff4cd830a7",
+		"name": "PlayGen tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "{url_root}",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"NOOP\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message is ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Welcome to the 'playgen' api.\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}",
+					"host": [
+						"{{url_root}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url_root}/v1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is NOOP\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"NOOP\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message is ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"V1 is the current version.\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}/v1",
+					"host": [
+						"{{url_root}}"
+					],
+					"path": [
+						"v1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url_root}/v9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 501\", function () {\r",
+							"    pm.response.to.have.status(501);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is ERROR\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"ERROR\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message is ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Version not supported.\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}/v9",
+					"host": [
+						"{{url_root}}"
+					],
+					"path": [
+						"v9"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url_root}/bad_path",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is ERROR\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"ERROR\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message is ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Sorry can't find that!\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}/bad_path",
+					"host": [
+						"{{url_root}}"
+					],
+					"path": [
+						"bad_path"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url}/bad_path",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is ERROR\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"ERROR\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message is ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Sorry can't find that!\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/bad_path",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"bad_path"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    // pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+							"});\r",
+							"// TODO: store different paths per target"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"name\": \"sample\",\r\n\t\"filePath\": {{sample_playlist_file}},\r\n\t\"description\": \"Test entry\",\r\n\t\"partialTitleDelimiters\": \"(,/\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{url}}/playlists",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url}/playlists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"File path is correct\", function () {\r",
+							"    var fileName = pm.collectionVariables.get(\"sample_playlist_file\");\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Playlist count is 7\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.count).to.eql(7);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Playlist count is 7\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('7');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET,HEAD,POST');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.description).to.eql(\"Test entry\");\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(29);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Playlist count is 29\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('29');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"const sleep = (ms) => {\r",
+							"  return new Promise(resolve => setTimeout(resolve, ms));\r",
+							"};\r",
+							"sleep(2000);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"name\": \"sample\",\r\n\t\"filePath\": {{sample_playlist_file_2}},\r\n\t\"description\": \"Test entry (modified)\",\r\n\t\"partialTitleDelimiters\": \"/(,\",\r\n    \"redundantArtistThreshold\": 5\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample 2nd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var fileName = pm.environment.get(\"sample_playlist_file_2\").replace(/\\\\\\\\/g, \"\\\\\").replace(/\\\"/g, \"\");\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.description).to.eql(\"Test entry (modified)\");\r",
+							"    pm.expect(jsonData.result.redundantArtistThreshold).to.eql(5);\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(366);\r",
+							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"description\": \"Test entry (modified again)\",\r\n\t\"redundantTitleThreshold\": 10\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample 3rd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.description).to.eql(\"Test entry (modified again)\");\r",
+							"    pm.expect(jsonData.result.redundantTitleThreshold).to.eql(10);\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(366);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{url}/playlists 2nd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Playlist count is 6\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.count).to.eql(6);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET,HEAD,PUT,PATCH,DELETE');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/songs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 205\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.count).to.eql(205);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 205\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('205');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Total-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Total-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total song count is 205\", function () {\r",
+							"    var xTotalCount = pm.response.headers.get(\"X-Total-Count\");\r",
+							"    pm.expect(xTotalCount).to.eql('205');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/songs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 205\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('205');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Total-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Total-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total song count is 205\", function () {\r",
+							"    var xTotalCount = pm.response.headers.get(\"X-Total-Count\");\r",
+							"    pm.expect(xTotalCount).to.eql('205');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/songs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET,HEAD');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/songs/2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.title).to.eql(\"Amazing Grace\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/songs/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"songs",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/songs/2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/songs/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"songs",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong 2nd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong 3rd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/currentsong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/currentsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"currentsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/currentsong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/currentsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"currentsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.song.index).to.eql(45);\r",
+							"    pm.expect(jsonData.totalCount).to.eql(1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"songIndex\": 45 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests duplicate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"CONFLICT\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"songIndex\": 45 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.song.index).to.eql(157);\r",
+							"    pm.expect(jsonData.totalCount).to.eql(2);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"songIndex\": 157 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.song.index).to.eql(22);\r",
+							"    pm.expect(jsonData.totalCount).to.eql(3);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"songIndex\": 22 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests/1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.result.count).to.eql(2);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextSong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.result.index).to.eql(45);\r",
+							"    pm.expect(jsonData.result.song.index).to.eql(45);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextSong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextSong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextSong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.result.index).to.eql(22);\r",
+							"    pm.expect(jsonData.result.song.index).to.eql(22);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextSong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextSong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Return data is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    pm.expect(jsonData.result.requests.length).to.eql(0);\r",
+							"    pm.expect(jsonData.result.count).to.eql(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"History song count is at least 2\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.count).to.gte(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is at least 2\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    var count = parseInt(xCount);\r",
+							"    pm.expect(count).to.gte(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Total-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Total-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total song count is at least 2\", function () {\r",
+							"    var xTotalCount = pm.response.headers.get(\"X-Total-Count\");\r",
+							"    var count = parseInt(xTotalCount);\r",
+							"    pm.expect(count).to.gte(2);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/history",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is at least 2\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    var count = parseInt(xCount);\r",
+							"    pm.expect(count).to.gte(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Total-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Total-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total song count is at least 2\", function () {\r",
+							"    var xTotalCount = pm.response.headers.get(\"X-Total-Count\");\r",
+							"    var count = parseInt(xTotalCount);\r",
+							"    pm.expect(count).to.gte(2);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/history",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET,HEAD');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/history",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/history/2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/history/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"history",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/history/2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/history/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"history",
+						"2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
