@@ -9,7 +9,7 @@ The playlist generator has the following features:
 * Completely randomized song selection unattended 24/7
 * Based on NodeJS/Express technologies
 * Highly RESTful API
-* Can be accessed programmatically with HTTP requests (including with 'curl')
+* Can be accessed programmatically with HTTP requests (including with "`curl`")
 * Supports multiple playlists (e.g. for multiple program streams)
 * Randomizes song playback with advanced features
     * Optimized randomization logic to insure maximum "fairness"
@@ -30,7 +30,7 @@ Not only does "playgen" provide robust random song selection for services like
 Liquidsoap, it also can provide song list and status information to other webapps
 as well.  I have a web portal that shows me the full status of my Liquidsoap/Icecast
 system, including displays of all the playlists, song requests and histories, and
-"playgen" provides much of this data.
+the "playgen" API provides much of this data.
 
 ## **Prerequisites**
 
@@ -101,84 +101,241 @@ are selected again.  Redundant songs could be postponed, based on your
 configuration of the redundant title and artist thresholds, but it is very
 unlikely that this would prevent a song from ever getting played at all.
 Only in extreme cases (e.g. many redundancies and high thresholds in a
-small list) would a song never get selected (because it was postponed so
-often).
+small list) would a song never get selected (because it was repeatedly
+postponed again and again).
 
 ## **How to deploy this software**
 
-* Install a reasonable new version of NodeJS.  I recommend at least NodeJS version 12
-  (with npm version 6).  Use older versions at your own risk.
+* Install a reasonably new version of NodeJS.  I recommend at least NodeJS
+  version 12 (with npm version 6).  Use older versions at your own risk.
 
-* git clone the software into a fresh new directory
+* `git clone` the software into a fresh new directory
 
-* Run npm install to download all the dependancy modules into node_modules
+* Run `npm install` to download all the dependency modules into node_modules
 
-* Edit config/default.js to configure your MySQL database (you can also
-  customize development.js and production.js if desired).  You can also
-  change the port (default 3000).
-
-* Create the following table in your MySQL database, using the schema
-  specified in config/default.js
+* Edit `config/default.js` to configure your MySQL database.  You can also
+  customize `development.js` and `production.js` if desired, so that the
+  two behave differently.  For example, you could point them to different
+  databases, or have different logging levels.  You can also change the
+  port (default `3000`).  Typical settings might look like this:
 ```
-  CREATE TABLE 'playlists' (
-      'name' varchar(32) NOT NULL DEFAULT '',
-      'filePath' varchar(512) DEFAULT NULL,
-      'description' varchar(128) DEFAULT NULL,
-      'redundantTitleThreshold' int(10) unsigned DEFAULT NULL,
-      'redundantArtistThreshold' int(10) unsigned DEFAULT NULL,
-      'partialTitleDelimiters' varchar(16) DEFAULT NULL,
+  db: {
+    host: 'localhost',
+    user: 'your_db_user',
+    password: 'your_db_password',
+    database: 'YourDbSchemaName',
+    reconnectTime: 1000, // if DB connection is lost, was this many ms to reconnect
+  },
+```
+* Create the following table in your MySQL database, using the schema
+  specified in `config/default.js`...
+```
+  CREATE TABLE `playlists` (
+      `name` varchar(32) NOT NULL DEFAULT '',
+      `filePath` varchar(512) DEFAULT NULL,
+      `description` varchar(128) DEFAULT NULL,
+      `redundantTitleThreshold` int(10) unsigned DEFAULT NULL,
+      `redundantArtistThreshold` int(10) unsigned DEFAULT NULL,
+      `partialTitleDelimiters` varchar(16) DEFAULT NULL,
+      `songDetailsPluginName` varchar(32) DEFAULT NULL,
       PRIMARY KEY ('name')
   ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 ```
-* Populate the 'playlists' table with details about your desired playlist(s), 
+* Populate the `playlists` table with details about your desired playlist(s), 
   refer to the "Playlist Configuration" section below for details.  You can
-  directly add rows to the table, or later (after starting the playlist generator
-  service) you can use the `POST /api/vi/playlists` described in the "REST
-  API Reference" below to create more entries.
+  directly add playlist rows to the table with SQL statements, or later (after
+  starting the playlist generator service) you can use the `POST /api/vi/playlists`
+  described in the "REST API Reference" below to create more entries.
 
-* Use npm run start to run the playlist generator service
+* Use `npm run start` to run the playlist generator service
 
 * The playlist generator can be accessed with API calls like these:
 
-	* GET http://somehost:3000/api/playlists
+    * GET http://somehost:3000/api/v1/playlists
 
-	* GET http://somehost:3000/api/playlists/myplaylist
+    * GET http://somehost:3000/api/v1/playlists/myplaylist
 
-	* GET http://somehost:3000/api/playlists/crimson/nextsong
+    * GET http://somehost:3000/api/v1/playlists/crimson/nextsong
 
-	* GET http://somehost:3000/api/playlists/crimson/currentsong
+    * GET http://somehost:3000/api/v1/playlists/crimson/currentsong
+
+### **Docker support**
+
+I have gotten "playgen" to work in a Docker container on CentOS 7 using the
+provided Dockerfile and start/stop-docker.sh Bash scripts.  It is preliminary
+and experimental, so I cannot guarantee how well it will work for anyone else,
+but hopefully these files will help you to get started and experiment on your
+own.  If you find any refinements, do share them back to me for possible
+inclusion into this project.
+
+### **Windows Service support**
+
+Using the `node-windows` package, I have successfully deployed "playgen"
+as a Windows Service on Windows 10, and it has successfully run all its
+Unit Tests.  The supplied source files `windows-service-*.js` are used:
+
+* `windows-service-config.js` is where the service is configured; you will
+  need to edit it to match your directory paths and other requirements you
+  might have.
+
+
+* `windows-service-installs.js` installs the "playgen" Windows Service and
+  starts it running.  You'll be prompted several times to grant elevated
+  permissions since administrative changes are being made.
+
+
+* `windows-service-uninstalls.js` stops and removes the "playgen" Windows
+  Service.  You'll be prompted several times to grant elevated
+  permissions since administrative changes are being made.  Uninstalling
+  the `npm` project for "playgen" source code will *not* remove an installed
+  Windows Service, you must stop and uninstall it first yourself.
+
+Log files are generated, `node-windows` puts them in a `daemon`
+subdirectory below the "playgen" root directory.  However, the logging is
+not yet integrated into the Windows Event Service; the `node-windows`
+library for event logging would not work properly for me, so I've suspended
+those efforts for now.  If anyone can get it working, send me a PR and
+I'll try it out.
+
+`node-windows` is installed as a submodule within the "playgen" software
+project.  If you prefer, you can install it globally (so other software
+programs can use it too), but you'll need to understand how to use the
+`npm` software to do so.  The `node-windows` documentation covers this
+topic more.
+
+To use this feature, I advise you to study the `node-windows` software
+to better understand how it works at
+https://github.com/coreybutler/node-windows
+
+#### **Deploying "playgen" as a Windows Service**
+
+* Go to the "playgen" root directory.
+
+
+* Edit `windows-service-config.js` and adjust the configuration data
+  to suit your needs.  Most importantly, set `script` to the proper
+  directory path.  You can optionally adjust other setting if you like
+  (at your own risk).
+  
+
+* To actually install the service, run this command:
+
+```
+    node windows-service-install.js
+```
+* Say "Yes" to all the permission prompts.
+
+
+* If all goes well, the service will be installed and started.  Log files
+  will be generated in a newly-created `daemon` subdirectory, along with
+  several other service management file.  Do what you wish with the log
+  files, but leave the other files alone.
+
+
+* You can test "playgen" by calling some of its APIs using tools like
+  Postman or the `curl` command (it is up to you to install and learn
+  these tools).  Here are examples of `curl` commands:
+```
+    curl http://localhost:3000/api
+    curl http://localhost:3000/api/v1
+    curl http://localhost:3000/api/v1/playlists
+```
+* You can now start and stop the service just like any other Windows service
+  using the standard Windows Service Management tools.
+
+
+* To remove the service, run this command (saying "Yes" to permission
+  prompts again):
+
+```
+    node windows-service-uninstall.js
+```
+* When you remove the service, the `daemon` subdirectory and its contents
+  will be removed too.
+## **The Configuration data**
+
+In the source code folder `app/config` there is a configuration data structure that
+can be modified to your own needs (_at your own risk!_).  Most typically, you need to
+configure your MySQL database connection here, but there are other setting you might
+find useful as well.  For example, you can change logging behavior or customize plugins
+and their behavior.
+
+There are three source files you can modify:
+
+| Source file    | What it does |
+| -------------- | ------------ |
+| default.js     | The settings applied by default to the system, unless explicitly overridden |
+| development.js | These settings are added into the default settings if running in development mode (`npm run start`) |
+| production.js  | These settings are added into the default settings if running in production mode (`npm run start:prod`) |
+
+The difference between development and production mode is entirely up to you; it depends
+on what changes you make to these configuration files.  Nothing else changes in how the JS
+code is executed at run time.
+
+## **Unit Tests**
+
+There is a Collection of API Unit Tests that can be used in "Postman" (a
+programmers tool for testing data service APIs).  When configured properly,
+"playgen" runs all the Unit Tests successfully.  You can also use this
+Collection in Postman to experiment with, troubleshoot and exercise the
+API calls provided in "playgen".
+
+You'll need to be familiar with Postman in order to do these things.
+Specifically, you must know how to import Collections, set up environment
+variables, and run tests within a Collection.  This document does not
+teach you how to use Postman.  You need to install Postman and learn how
+to use it.
+
+The file "`PlayGen tests.postman_collection.json`" can be used to import
+the Collection of Unit Tests into Postman.
+
+For the Postman tests to work, the following environment variable must be
+set inside Postman.  The following table shows the required variable and
+sample values.  You'll probably need to adjust the directory paths.
+
+| Variable               | Initial Value                | Current Value                |
+| ---------------------- | ---------------------------- | ---------------------------- |
+| url_root               | http://localhost:3000/api    | http://localhost:3000/api    |
+| url                    | http://localhost:3000/api/v1 | http://localhost:3000/api/v1 |
+| sample_playlist_file   | "D:\\\\src\\\\playgen\\\\playlists\\\\johnson-playlist.txt" | "D:\\\\src\\\\playgen\\\\playlists\\\\johnson-playlist.txt" |
+| sample_playlist_file_2 | "D:\\\\src\\\\playgen\\\\playlists\\\\retro-playlist.txt"   | "D:\\\\src\\\\playgen\\\\playlists\\\\retro-playlist.txt"   |
+
+Notice that some values include double quotes and double backslashes.
+Those are required, particularly in Windows environments.  You might
+have to experiment and change them on other platforms.
 
 ## **Playlist Configuration**
 
-In the 'playlists' table, each row describes a different playlist.  For each
-playlist you wish to have, you must add one row to this table describing
-that playlist.  The following columns are required in each row:
+In the `playlists` table, each row describes a different playlist.
+For each playlist you wish to have, you must add one row to this table
+describing that playlist.  The following columns are required in each row:
 
-* name: the id for the playlist
+* `name`: the id for the playlist
 
-* filePath: the absolute path to a text file naming all the songs in the
-  playlist, sample files are in the "playlists" directory
+* `filePath`: the absolute path to a text file naming all the songs in the
+  playlist, sample files are in the `playlists` directory
 
-* description: a human-readable description of the playlist
+* `description`: a human-readable description of the playlist
 
-* redundantTitleThreshold: the number of songs selected before another song
+* `redundantTitleThreshold`: the number of songs selected before another song
   with an identical name is allowed, unused if set to 0
 
-* redundantArtistThreshold: the number of songs selected before another
+* `redundantArtistThreshold`: the number of songs selected before another
   song with an identical artist is allowed, unused if set to 0
-* partialTitleDelimiters: a collection of characters that will be treated
+
+* `partialTitleDelimiters`: a collection of characters that will be treated
   as delimiters when comparing for duplicate titles.  For example, if set to
   "(,", then the titles "Sing Along", "Sing Along (live)", and "Sing Along,
   Sing With Me (medley)" would all be treated as identical titles because
-  their first delimited sections are identical.
+  their first delimited sections are identical.  Any text after the delimiter
+  characters are not considered in the name comparisons.
 
-
-## **Playlist Filenames**
+## **Playlist Filenames (and the "Standard Fielded Filename" format)**
 
 For "playgen" to use your song files, they must be named in a very specific way.
 Details about the songs are embedded into the songs filenames.  By having this
 metadata in the filenames, the song files themselves can be treated as totally
-content-agnostic, and there is no need for time-consuming parsing through the
+content-agnostic, and there is no need for time-consuming scanning through the
 song files for any other information.  This avoids the complication of
 extracting metadata from MP3 tags (or whatever you might use for other file
 formats).
@@ -205,13 +362,164 @@ The filename should be:
 ```
 Pearline-Son House-The Original Delta Blues-Columbia Legacy-1965.mp3
 ```
+In this document, this is what we call a "**Standard Fielded Filename**".
+
 You'll probably want to make some automated shell script program to take new
 song files and convert them to this exact filename nomenclature.  That will
 save you a lot of bother over time.
 
-In future versions, I might add support for reading MP3 tags, but this
-filename nomenclature will still remain the main way of parsing out song
-data for the sake of speed and simplicity.
+Standard Fielded Filenames are the default way of getting song details in
+"playgen".  While the initial renaming of your song files might be tedious,
+you benefit from much faster startup performance after that.  Of course, this
+may not be ideal for everyone, especially if your collection of song files is
+big.  In that case you can use (or create) some different logic using the "plugin"
+architecture described in the next section.
+
+## **Customizing "playgen" with plugins**
+
+A new design architecture has been introduced so that existing features can be
+customized using "plugins".
+
+A "plugin" is a small module of Javascript code that is:
+* written by anyone, either me (the original developer) or you (the end user)
+* it conforms to a well-defined interface (it provides predefined functions
+  to do certain required tasks)
+* you customize how the plugin does its assigned tasks by writing your own
+  custom logic
+* The plugin is deployed into "playgen" by adding the code to the "playgen"
+  source tree and registering it in the configuration file(s).
+* A default plugin is always provided with some reasonable built-in behaviors.
+
+This plugin architecture will support the following things:
+
+* **Logging**: you can implement customized handling of log messages from the
+  "playgen" server as it runs.  The default logging plugin will send
+  messages to standard output using the Javascript console.  Available
+  plugins included with playgen:
+    * _console_ (default): send log messages to standard output via the Javascript `console` object
+    * _localFile_: send log messages to file of your choosing
+
+* **Song Details**: you can implement your own custom logic
+  for extracting details like title, artist, album, etc.  The default plugin
+  assumes all song files use "Standard Fielded Filenames".  You will be able
+  to bypass this requirement if you create your own plugin and implement
+  some different logic.  Available
+  plugins included with playgen:
+    * _standardFieldedFilename_ (default): extracts song details from the filename
+    * _mp3tags_: reads MP3 tags; this might slow startups considerably
+
+The provided plugins can serve as a starting point for creating new
+plugins.  You can copy one of those and modify it to suit your needs.
+
+Each different kind of plugin will have a different interface; that is, a
+different set of well-defined functions that must be implemented.  But all
+kinds of plugins will share one function in common: the "initPlugin"
+function will be used to initialize all plugins when "playgen" starts.
+
+When you write plugin functions, they need to be as reliable and fast as
+possible.  Otherwise, "playgen" could become sluggish or unstable.  Do this
+at your own risk.
+
+Also, do not change the parameters of the interface functions or the plugin
+architecture will be undermined.  You can omit trailing unused parameters but
+don't add new parameters or change their ordering.
+
+If you make a nice (and good quality) plugin, consider sharing it with a PR.
+
+### **Registering your own plugin**
+
+Once you have written a new plugin, you can register it with the following steps:
+
+* Your plugin code must be in a Javascript file whose name ends with `.js`.
+
+* Place that Javascript file in the appropriate source code directory: for logging
+  plugins `app/plugins/logging`, or for song details plugins `app/plugins/songDetails`.
+
+* In the configuration data, import the new code with something like this example:
+```
+    const myNewLoggingPlugin = require('../plugins/logging/myNewPlugin');
+```
+
+* Under `config.plugins.logging` or `config.plugins.songDetails` (depending on your
+  type of plugin) there is an array of plugin definitions.  Add an entry for your
+  new plugin to this array.  For example, it might look like this:
+```
+      {
+        name: 'myNewPlugin', // what you'll name the plugin
+        pluginImpl: myNewLoggingPlugin, // the actual imported code
+        params: [ // optional parameters, only if you need them in your code
+          {
+            name: 'myParam', // the name of your param
+            value: 12345, // the value of your param
+          },
+        ],
+        default: false, // optional, set true if you want this plugin used by default
+        // but remember to remove the 'default: true' from other plugins of the same
+        // type, only one plugin of any given type can be the 'default'!
+      },
+```
+
+* Once your plugin is registered, it can be activated using the instructions below.
+
+### **Logging plugins**
+
+To create a new logging plugin, your Javascript code must implement the
+following set of functions:
+
+| Function                    | What the function does |
+| --------------------------- | ---------------------- |
+| `initPlugin(config,params)` | Initializes the plugin, the config data is provided in case some of its data may be needed, as well as any named parameters that may have been configured |
+| `log(level,message)`        | Send the message to wherever logging is supposed to go, using the specified logging level |
+
+"playgen" emits logging message with the following levels:
+* `fatal`
+* `error`
+* `warn`
+* `info`
+* `debug`
+* `none` (this is used to disable certain log messages within the code)
+
+If you are sending these messages to a different logging service, then that
+service might not use the same log levels as shown here, they could be slightly
+different.  In that case, your plugin must convert these log levels to whatever
+similar levels are provided in that logging service.
+
+#### **Activating your logging plugin**
+
+You can activate any logging plugin that has been registered by setting
+`config.logType` in the configuration data to the name of the plugin you
+wish to use.  This one global setting is used for all playlists.
+
+### **Song Details plugins**
+
+To create a new song details plugin, your Javascript code must implement the
+following set of functions:
+
+| Function                    | What the function does |
+| --------------------------- | ---------------------- |
+| `initPlugin(config,params)` | Initializes the plugin, the config data is provided in case some of its data may be needed, as well as any named parameters that may have been configured |
+| `extract(songFile)`         | Given a song file name, learn the song details and return them in a data object |
+
+The returned data object must have the following fields:
+* title
+* artist
+* album
+* label (the record company)
+* year
+
+If any of these fields are unavailable, you can omit them or set them to the
+Javascript `undefined` keyword.  Just don't return an empty object or `null`
+or `undefined`, at least return a title and artist.
+
+If you add any additional fields, "playgen" will not recognize them, they
+will be ignored.
+
+#### **Activating your song details plugin**
+
+Each playlist can have a different song details plugin activated by entering
+the plugin name in the `songDetailsPluginName` column of that playlist row
+in the `playlists` table in the MySQL database.  If that value is left `NULL`
+in the database, then the default plugin will be used.
 
 ## **Liquidsoap Usage**
 
@@ -220,12 +528,13 @@ software that plays one song after another.  However, it was designed
 specifically with Liquidsoap in mind, so here is an example of a Liquidsoap
 configuration that uses "playgen" for song selections.
 
-The system command 'curl' is used to call the "playgen" API, the "?format=text"
-returns simple text instead of JSON for easier consumption by Liquidsoap.
+The system command `curl` is used to call the "playgen" API, the `?format=text`
+option returns simple text instead of JSON for easier consumption by Liquidsoap.
 There may be a more elegant way to call the API from Liquidsoap, feel free to
 inform me if you know a better way.
 
-This example is a partial excerpt of the total configuration file.
+This example is a partial excerpt of a Liquidsoap 1.4 configuration file.  The
+code for Liquidsoap 2.0 might be slightly different.
 
 ```
 playlistJingles = audio_to_stereo(playlist("~liquidsoap/playlists/jingles-playlist.txt"))
@@ -753,7 +1062,7 @@ _Sample response headers_
 
 * Returns the history list of all the songs selected for the specified playlist.
 The history list remembers all songs selected or requested for this playlist
-since the playgen service started running, up to a maximum limit coded in the
+since the "playgen" service started running, up to a maximum limit coded in the
 config source files.
 
 _Sample response body_

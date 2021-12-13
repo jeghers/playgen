@@ -1,32 +1,20 @@
 
 const _ = require('lodash');
 
-const config = require('./config');
+const { getPlugin, getDefaultPlugin } = require('./plugins/pluginUtils');
 const {
-  LOG_LEVEL_FATAL,
-  LOG_LEVEL_FATAL_VALUE,
+  PLUGIN_TYPE_LOGGING,
+  PLUGIN_TYPE_SONG_DETAILS,
   LOG_LEVEL_ERROR,
-  LOG_LEVEL_ERROR_VALUE,
-  LOG_LEVEL_WARNING,
-  LOG_LEVEL_WARNING_VALUE,
   LOG_LEVEL_INFO,
-  LOG_LEVEL_INFO_VALUE,
   LOG_LEVEL_DEBUG,
-  LOG_LEVEL_DEBUG_VALUE,
   LOG_LEVEL_NONE,
-  LOG_LEVEL_NONE_VALUE,
 } = require('./constants');
+let config;
 
-const logLevels = {
-  [LOG_LEVEL_FATAL]: LOG_LEVEL_FATAL_VALUE,
-  [LOG_LEVEL_ERROR]: LOG_LEVEL_ERROR_VALUE,
-  [LOG_LEVEL_WARNING]: LOG_LEVEL_WARNING_VALUE,
-  [LOG_LEVEL_INFO]: LOG_LEVEL_INFO_VALUE,
-  [LOG_LEVEL_DEBUG]: LOG_LEVEL_DEBUG_VALUE,
-  [LOG_LEVEL_NONE]: LOG_LEVEL_NONE_VALUE,
+const setConfigForUtils = configToInstall => {
+  config = configToInstall;
 };
-
-const configLogLevelValue = logLevels[config.log] || LOG_LEVEL_INFO_VALUE;
 
 /* eslint-disable max-params */
 const handleError = (res, status, error, message) => {
@@ -36,54 +24,55 @@ const handleError = (res, status, error, message) => {
   res.json({ status: error, message: message });
 };
 
-const watchPromise = p => {
+const watchLoadFilePromise = p => {
   if (p) {
     p.then((responsePlaylist) => {
-      log(LOG_LEVEL_INFO, 'Playlist ' + responsePlaylist.name + ' loaded ' +
-        responsePlaylist.count() + ' songs successfully');
+      log(LOG_LEVEL_INFO, `Playlist ${responsePlaylist.name} loaded ${responsePlaylist.count()} songs successfully`);
       log(LOG_LEVEL_DEBUG, 'Playlist...');
       log(LOG_LEVEL_DEBUG, responsePlaylist);
     }, (error) => {
-      log(LOG_LEVEL_ERROR, 'Promise failed.', error);
+      log(LOG_LEVEL_ERROR, `Promise failed: ${error.toString()}`);
     });
   }
 };
 
-const log = (level, message) => {
-  const logLevelValue = logLevels[level];
-  if (_.isUndefined(logLevelValue)) {
-    // logging error
-    console.log(`UNKNOWN LEVEL '${level}': ${message}`)
-  } else if (logLevelValue >= configLogLevelValue) {
-    let loggingCall = console.log;
-    switch (logLevelValue) {
-      case LOG_LEVEL_FATAL_VALUE:
-      case LOG_LEVEL_ERROR_VALUE:
-        loggingCall = console.error;
-        break;
-      case LOG_LEVEL_WARNING_VALUE:
-        loggingCall = console.warn;
-        break;
-      case LOG_LEVEL_INFO_VALUE:
-        loggingCall = console.info;
-        break;
-      case LOG_LEVEL_DEBUG_VALUE:
-        loggingCall = console.debug;
-        break;
-      default:
-        break;
+let loggingErrorGiven = false;
+let globalLogType;
+
+const log = (level, message, plugin) => {
+  if (_.isUndefined(globalLogType)) {
+    globalLogType = getPlugin(PLUGIN_TYPE_LOGGING, config.logType);
+    if (_.isUndefined(globalLogType)) {
+      globalLogType = getDefaultPlugin(PLUGIN_TYPE_LOGGING);
     }
-    if (typeof message === 'object') {
-      loggingCall(`${level.toUpperCase()}:`);
-      loggingCall(message);
-    } else {
-      loggingCall(`${level.toUpperCase()}: ${message}`);
-    }
+  }
+  if (level === LOG_LEVEL_NONE) {
+    return;
+  }
+  const pluginToUse = _.isUndefined(plugin) ? globalLogType : plugin;
+  if (!_.isUndefined(pluginToUse.pluginImpl) &&
+    !_.isUndefined(pluginToUse.pluginImpl.log)) {
+    pluginToUse.pluginImpl.log(level, message);
+  } else if (!loggingErrorGiven) {
+    console.error('*** No logging available');
+    loggingErrorGiven = true;
   }
 };
 
+const extract = (songFilePath, plugin) => {
+  const pluginToUse = plugin || getDefaultPlugin(PLUGIN_TYPE_SONG_DETAILS);
+  if (!_.isUndefined(pluginToUse.pluginImpl) &&
+      !_.isUndefined(pluginToUse.pluginImpl.extract) &&
+      !_.isUndefined(songFilePath)) {
+    return pluginToUse.pluginImpl.extract(songFilePath);
+  }
+  return false;
+};
+
 module.exports = {
+  setConfigForUtils,
   handleError,
-  watchPromise,
+  watchLoadFilePromise,
   log,
+  extract,
 };

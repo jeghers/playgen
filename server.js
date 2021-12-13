@@ -5,16 +5,20 @@ const bodyParser = require('body-parser');
 const httpStatus = require('http-status-codes');
 
 const config = require('./app/config');
-const { dbInit } = require('./app/db');
-const { log } = require('./app/utils');
-const {
-  NOOP,
-  ERROR,
-  LOG_LEVEL_INFO,
-} = require('./app/constants');
+const { setConfigForDb, dbInit } = require('./app/db');
+const { initAllPlugins } = require('./app/plugins/pluginUtils');
+const { setConfigForUtils, log } = require('./app/utils');
+const { setConfigForPlaylist } = require('./app/Playlist');
+const { NOOP, ERROR, LOG_LEVEL_INFO } = require('./app/constants');
 
 const port = process.env.PORT || config.session.port; // set our port
 
+setConfigForDb(config);
+setConfigForUtils(config);
+setConfigForPlaylist(config);
+initAllPlugins(config);
+
+// wait until after plugins are initialized before trying to log anything
 log(LOG_LEVEL_INFO, 'config...');
 log(LOG_LEVEL_INFO, config);
 
@@ -80,4 +84,4 @@ app.use((req, res) => {
 // start the server
 // =============================================================================
 app.listen(port);
-log(LOG_LEVEL_INFO, 'Listening on port ' + port);
+log(LOG_LEVEL_INFO, `Listening on port ${port}`);

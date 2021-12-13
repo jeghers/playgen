@@ -59,8 +59,8 @@ router.get('/', (req, res /* , next */) => {
           log(LOG_LEVEL_DEBUG, 'Query string...');
           log(LOG_LEVEL_DEBUG, req.query);
           const { start, length } = req.query;
-          log(LOG_LEVEL_DEBUG, 'Query string for start = ' + start);
-          log(LOG_LEVEL_DEBUG, 'Query string for length = ' + length);
+          log(LOG_LEVEL_DEBUG, `Query string for start = ${start}`);
+          log(LOG_LEVEL_DEBUG, `Query string for length = ${length}`);
           if (start) {
             history = history.slice(start);
           }

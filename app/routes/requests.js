@@ -53,8 +53,7 @@ router.post('/', (req, res /* , next */) => {
       log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
-          'Playlist "' + playlistId + '" not found');
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND, 'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];
@@ -173,8 +172,7 @@ router.head('/', (req, res /* , next */) => {
       log(LOG_LEVEL_DEBUG, rows);
 
       if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
-          'Playlist "' + playlistId + '" not found');
+        handleError(res, httpStatus.NOT_FOUND, NOTFOUND, 'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = playlists[rows[0].name];

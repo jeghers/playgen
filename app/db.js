@@ -1,19 +1,24 @@
 const mysql = require('mysql8');
 
-const Playlist = require('./Playlist');
-const { watchPromise, log } = require('./utils');
-const config = require('./config');
+const { Playlist } = require('./Playlist');
+const { watchLoadFilePromise, log } = require('./utils');
 const {
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
   LOG_LEVEL_ERROR,
+  LOG_LEVEL_NONE,
 } = require('./constants');
 
 let db = null;
+let config;
 const playlists = {};
 
 const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+const setConfigForDb = configToInstall => {
+  config = configToInstall;
 };
 
 const dbInit = () => {
@@ -58,8 +63,8 @@ const dbInit = () => {
       return;
     }
 
-    // log(LOG_LEVEL_DEBUG, 'Data received from DB:');
-    // log(LOG_LEVEL_DEBUG, rows);
+    log(LOG_LEVEL_NONE, 'Data received from DB:');
+    log(LOG_LEVEL_NONE, rows);
 
     /* eslint-disable no-warning-comments */
     if (rows && rows.length) {
@@ -67,7 +72,7 @@ const dbInit = () => {
         // TODO: try to rescue old history on re-connect of DB
         const playlist = new Playlist(rows[i]);
         const promise = playlist.loadFile();
-        watchPromise(promise);
+        watchLoadFilePromise(promise);
         playlists[playlist.name] = playlist;
       }
     }
@@ -83,6 +88,7 @@ const dbInit = () => {
 };
 
 module.exports = {
+  setConfigForDb,
   dbInit,
   getDb: () => db,
   playlists,

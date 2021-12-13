@@ -5,14 +5,22 @@
 const fs = require('fs');
 const _ = require('lodash');
 
-const { log } = require('./utils');
-const config = require('./config');
+const { getPlugin, getDefaultPlugin } = require('./plugins/pluginUtils');
+const { log, extract } = require('./utils');
 const {
+  PLUGIN_TYPE_SONG_DETAILS,
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
   LOG_LEVEL_ERROR,
   LOG_LEVEL_WARNING,
+  LOG_LEVEL_NONE,
 } = require('./constants');
+
+let config;
+
+const setConfigForPlaylist = configToInstall => {
+  config = configToInstall;
+};
 
 class Playlist {
   constructor(data) {
@@ -22,6 +30,9 @@ class Playlist {
     this.redundantTitleThreshold = data.redundantTitleThreshold;
     this.partialTitleDelimiters = data.partialTitleDelimiters;
     this.redundantArtistThreshold = data.redundantArtistThreshold;
+    this.songDetailsPlugin = data.songDetailsPluginName ?
+      getPlugin(PLUGIN_TYPE_SONG_DETAILS, data.songDetailsPluginName) :
+      getDefaultPlugin(PLUGIN_TYPE_SONG_DETAILS);
     if ((data.hasOwnProperty('_songsToPlay')) && (data._songsToPlay)) {
       this._fileLoaded = true;
       this._songsToPlay = data._songsToPlay;
@@ -34,8 +45,7 @@ class Playlist {
       this._songHistory = data._songHistory;
       this._titleHistory = data._titleHistory;
       this._artistHistory = data._artistHistory;
-    }
-    else {
+    } else {
       this._fileLoaded = false;
       this._songsToPlay = null;
       this._songCount = 0;
@@ -86,22 +96,19 @@ class Playlist {
             }
           });
         }
-        log(LOG_LEVEL_DEBUG, 'Playlist "' + thisPlaylist.name + '" song file ' +
-          thisPlaylist.filePath + ' DOES exist and is readable');
+        log(LOG_LEVEL_DEBUG, `Playlist "${thisPlaylist.name}" song file ${thisPlaylist.filePath} DOES exist and is readable`);
         return new Promise((resolve, reject) => {
           const fileInput = fs.createReadStream(thisPlaylist.filePath);
           thisPlaylist._readLines(fileInput, resolve, reject);
         });
       }
       catch (err) {
-        log(LOG_LEVEL_ERROR, 'Playlist "' + thisPlaylist.name + '" song file ' +
-          thisPlaylist.filePath +
-          ' DOES NOT exist or is not readable');
+        log(LOG_LEVEL_ERROR, `Playlist "${thisPlaylist.name}" song file ${thisPlaylist.filePath} DOES NOT exist or is not readable`);
         return null;
       }
     }
     else {
-      log(LOG_LEVEL_WARNING, 'Playlist "' + thisPlaylist.name + '" has no file to load');
+      log(LOG_LEVEL_WARNING, `Playlist "${thisPlaylist.name}" has no file to load`);
       return null;
     }
   }
@@ -135,7 +142,7 @@ class Playlist {
           thisPlaylist._buildRandomIndex();
           thisPlaylist._clearSongHistory();
         }
-        log(LOG_LEVEL_DEBUG, 'Playlist "' + thisPlaylist.name + '" song count is ' + thisPlaylist._songCount);
+        log(LOG_LEVEL_DEBUG, `Playlist "${thisPlaylist.name}" song count is ${thisPlaylist._songCount}`);
         resolve(thisPlaylist);
       }
     });
@@ -156,22 +163,12 @@ class Playlist {
   }
 
   _processLine(line, lineIndex) {
-    const songFile = line.replace(/\r/, '');
-    log(LOG_LEVEL_DEBUG, 'Song file: ' + songFile);
+    const songFilePath = line.replace(/\r/, '');
+    log(LOG_LEVEL_DEBUG, `Song file: ${songFilePath}`);
     if (!this._songsToPlay) { this._songsToPlay = []; }
-    const o = { file: songFile };
-    const index = songFile.lastIndexOf('/');
-    if (index > -1) {
-      const fileName = songFile.substring(index + 1)
-        .replace(/.[A-Za-z0-9]+$/, '');
-      const fields = fileName.split('-');
-      o.index = lineIndex;
-      o.title = fields[0];
-      o.artist = fields[1];
-      o.album = fields[2];
-      o.label = fields[3];
-      o.year = fields[4];
-    }
+    const o = extract(songFilePath, this.songDetailsPlugin);
+    o.index = lineIndex;
+    o.file = songFilePath;
     this._songsToPlay.push(o);
   }
 
@@ -189,8 +186,8 @@ class Playlist {
       else if (a.randomIndex > b.randomIndex) { return 1; }
       else { return 0; }
     });
-    // log(LOG_LEVEL_DEBUG, 'this._randomIndices...');
-    // log(LOG_LEVEL_DEBUG, this._randomIndices);
+    log(LOG_LEVEL_NONE, 'this._randomIndices...');
+    log(LOG_LEVEL_NONE, this._randomIndices);
     this._currentSongIdxIdx = null;
     this._currentSongIdx = null;
     this._currentSong = null;
@@ -203,7 +200,7 @@ class Playlist {
         // delimiters at the very front of the string don't count, start at 1, not 0
         for (let i = 1; i < this._partialTitleDelimiters.length; i++) {
           ch = this._partialTitleDelimiters.charAt(i);
-          if (/\s/.test(ch)) { continue; }
+          if ((/\s/).test(ch)) { continue; }
           idx = nextTitle.indexOf(ch);
           if (idx > -1) {
             nextTitle = nextTitle.substring(0, idx).trim();
@@ -227,7 +224,7 @@ class Playlist {
             }
           }
         }
-        // log(LOG_LEVEL_DEBUG, `Comparing ${recentTitle.toLowerCase()} to ${nextTitle}`);
+        log(LOG_LEVEL_NONE, `Comparing ${recentTitle.toLowerCase()} to ${nextTitle}`);
         if (recentTitle.toLowerCase() === nextTitle) {
           log(LOG_LEVEL_INFO, `${nextTitle} is a duplicate title`);
           return true;
@@ -253,8 +250,8 @@ class Playlist {
     const randomIndexEntry = this._randomSongIndices[this._currentSongIdxIdx];
     log(LOG_LEVEL_DEBUG, 'randomIndexEntry...');
     log(LOG_LEVEL_DEBUG, randomIndexEntry);
-    // log(LOG_LEVEL_DEBUG, 'this._randomSongIndices...');
-    // log(LOG_LEVEL_DEBUG, this._randomSongIndices);
+    log(LOG_LEVEL_NONE, 'this._randomSongIndices...');
+    log(LOG_LEVEL_NONE, this._randomSongIndices);
     let newIndex;
     if (this._currentSongIdxIdx > this._songCount / 2) {
       // duplicate is in 2nd half of list,
@@ -263,8 +260,8 @@ class Playlist {
       newIndex = this._currentSongIdxIdx - Math.floor(this._songCount * 3 / 7);
       log(LOG_LEVEL_DEBUG, `Moving entry BACKWARDS from ${this._currentSongIdxIdx} to ${newIndex}`);
       this._randomSongIndices.splice(newIndex, 0, randomIndexEntry);
-      // log(LOG_LEVEL_DEBUG, 'this._randomSongIndices...');
-      // log(LOG_LEVEL_DEBUG, this._randomSongIndices);
+      log(LOG_LEVEL_NONE, 'this._randomSongIndices...');
+      log(LOG_LEVEL_NONE, this._randomSongIndices);
 
       // on next iteration, this._currentSongIdxIdx will get
       // incremented and point happily at the next entry in the list
@@ -275,8 +272,8 @@ class Playlist {
       newIndex = this._currentSongIdxIdx + Math.floor(this._songCount * 3 / 7);
       log(LOG_LEVEL_DEBUG, `Moving entry FORWARDS from ${this._currentSongIdxIdx} to ${newIndex}`);
       this._randomSongIndices.splice(newIndex, 0, randomIndexEntry);
-      // log(LOG_LEVEL_DEBUG, 'this._randomSongIndices...');
-      // log(LOG_LEVEL_DEBUG, this._randomSongIndices);
+      log(LOG_LEVEL_NONE, 'this._randomSongIndices...');
+      log(LOG_LEVEL_NONE, this._randomSongIndices);
 
       // on next iteration, this._currentSongIdxIdx needs to
       // stay pointed at this index (where the next entry will
@@ -299,8 +296,7 @@ class Playlist {
       this._priorityRequests.splice(0,1);
       log(LOG_LEVEL_DEBUG, `this._currentSongIdx = ${this._currentSongIdx}`);
       nextSong = this._songsToPlay[this._currentSongIdx];
-    }
-    else {
+    } else {
       let isDuplicate;
       let retries = config.playlists.duplicateReplacementRetries;
       do {
@@ -379,13 +375,15 @@ class Playlist {
       if (this._songHistory.length > config.playlists.songHistoryLimit) {
         this._songHistory = this._songHistory.slice(0, config.playlists.songHistoryLimit);
       }
-      /* log(LOG_LEVEL_DEBUG, 'Song history...');
-      var songHistoryString = '';
-      for (var i = 0; i < this._songHistory.length; i++)
-      {
+      if (config.logLevel !== LOG_LEVEL_NONE) {
+        log(LOG_LEVEL_NONE, 'Song history...');
+        let songHistoryString = '';
+        for (let i = 0; i < this._songHistory.length; i++)
+        {
           songHistoryString += '(' + this._songHistory[i].title + ') ';
+        }
+        log(LOG_LEVEL_NONE, songHistoryString);
       }
-      log(LOG_LEVEL_DEBUG, songHistoryString); */
 
       if (song.title) {
         this._titleHistory.unshift(song.title);
@@ -393,13 +391,15 @@ class Playlist {
           this._titleHistory = this._titleHistory.slice(0, this.redundantTitleThreshold);
         }
       }
-      /* log(LOG_LEVEL_DEBUG, 'Title history...');
-      var titleHistoryString = '';
-      for (var i = 0; i < this._titleHistory.length; i++)
-      {
+      if (config.logLevel !== LOG_LEVEL_NONE) {
+        log(LOG_LEVEL_NONE, 'Title history...');
+        let titleHistoryString = '';
+        for (let i = 0; i < this._titleHistory.length; i++)
+        {
           titleHistoryString += '(' + this._titleHistory[i] + ') ';
+        }
+        log(LOG_LEVEL_NONE, titleHistoryString);
       }
-      log(LOG_LEVEL_DEBUG, titleHistoryString); */
 
       if (song.artist) {
         this._artistHistory.unshift(song.artist);
@@ -407,13 +407,15 @@ class Playlist {
           this._artistHistory = this._artistHistory.slice(0, this.redundantArtistThreshold);
         }
       }
-      /* log(LOG_LEVEL_DEBUG, 'Artist history...');
-      var artistHistoryString = '';
-      for (var i = 0; i < this._artistHistory.length; i++)
-      {
+      if (config.logLevel !== LOG_LEVEL_NONE) {
+        log(LOG_LEVEL_NONE, 'Artist history...');
+        let artistHistoryString = '';
+        for (let i = 0; i < this._artistHistory.length; i++)
+        {
           artistHistoryString += '(' + this._artistHistory[i] + ') ';
+        }
+        log(LOG_LEVEL_NONE, artistHistoryString);
       }
-      log(LOG_LEVEL_DEBUG, artistHistoryString); */
     }
   }
 
@@ -426,4 +428,7 @@ class Playlist {
 
 }
 
-module.exports = Playlist;
+module.exports = {
+  setConfigForPlaylist,
+  Playlist,
+};

@@ -6,8 +6,8 @@ const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 
 const { dbInit, getDb, playlists } = require('../db');
-const { handleError, watchPromise, log } = require('../utils');
-const Playlist = require('../Playlist');
+const { handleError, watchLoadFilePromise, log } = require('../utils');
+const { Playlist } = require('../Playlist');
 const {
   ERROR,
   NOTFOUND,
@@ -15,6 +15,7 @@ const {
   LOG_LEVEL_INFO,
   LOG_LEVEL_WARNING,
   LOG_LEVEL_ERROR,
+  LOG_LEVEL_NONE,
 } = require('../constants');
 
 // router.use(logger('combined')); // was 'dev'
@@ -28,15 +29,14 @@ router.get('/', (req, res /* , next */) => {
   log(LOG_LEVEL_INFO, `/api/v1/playlists called with GET url = ${req.url}`);
   getDb().query('SELECT * FROM playlists', (err, rows) => {
     if (err) {
-      handleError(res, httpStatus.PRECONDITION_REQUIRED, ERROR,
-        'Error querying playlists - ' + err);
+      handleError(res, httpStatus.PRECONDITION_REQUIRED, ERROR, 'Error querying playlists - ' + err);
       log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
       dbInit();
       return;
     }
 
-    // log(LOG_LEVEL_DEBUG, 'Data received from DB:');
-    // log(LOG_LEVEL_DEBUG, rows);
+    log(LOG_LEVEL_NONE, 'Data received from DB:');
+    log(LOG_LEVEL_NONE, rows);
 
     const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
     for (let i = 0; i < rows.length; i++) {
@@ -71,8 +71,8 @@ router.head('/', (req, res /* , next */) => {
       return;
     }
 
-    // log(LOG_LEVEL_DEBUG, 'Data received from DB:');
-    // log(LOG_LEVEL_DEBUG, rows);
+    log(LOG_LEVEL_NONE, 'Data received from DB:');
+    log(LOG_LEVEL_NONE, rows);
 
     log(LOG_LEVEL_DEBUG, `Total of ${rows.length} playlists`);
     res.status(httpStatus.OK);
@@ -100,10 +100,9 @@ router.post('/', (req, res /* , next */) => {
   if (req.body.filePath) {
     insertParams.filePath = req.body.filePath;
     data.filePath = req.body.filePath;
-    log(LOG_LEVEL_DEBUG, 'filePath = ' + req.body.filePath);
+    log(LOG_LEVEL_DEBUG, `filePath = ${req.body.filePath}`);
   } else {
-    handleError(res, httpStatus.BAD_REQUEST, ERROR,
-      'Error creating playlist ' + name + ' - no file path given');
+    handleError(res, httpStatus.BAD_REQUEST, ERROR, `Error creating playlist ${name} - no file path given`);
     return;
   }
   if (req.body.description) {
@@ -126,6 +125,11 @@ router.post('/', (req, res /* , next */) => {
     data.redundantArtistThreshold = req.body.redundantArtistThreshold;
     log(LOG_LEVEL_DEBUG, `redundantArtistThreshold = ${req.body.redundantArtistThreshold}`);
   }
+  if (req.body.songDetailsPluginName) {
+    insertParams.songDetailsPluginName = req.body.songDetailsPluginName;
+    data.songDetailsPluginName = req.body.songDetailsPluginName;
+    log(LOG_LEVEL_DEBUG, `songDetailsPluginName = ${req.body.songDetailsPluginName}`);
+  }
 
   getDb().query('INSERT INTO playlists SET ?',
     insertParams, (err /* , result */) => {
@@ -140,7 +144,7 @@ router.post('/', (req, res /* , next */) => {
       log(LOG_LEVEL_DEBUG, 'Last insert ID:', res.insertId);
       const playlist = new Playlist(data);
       const promise = playlist.loadFile();
-      watchPromise(promise);
+      watchLoadFilePromise(promise);
       playlists[name] = playlist;
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
       log(LOG_LEVEL_DEBUG, playlists);
@@ -339,7 +343,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
       }
       if (fileChanged) {
         const promise = dataCopy.loadFile();
-        watchPromise(promise);
+        watchLoadFilePromise(promise);
       }
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
       log(LOG_LEVEL_DEBUG, playlists);
@@ -442,7 +446,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
       }
       if (fileChanged) {
         const promise = dataCopy.loadFile();
-        watchPromise(promise);
+        watchLoadFilePromise(promise);
       }
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
       log(LOG_LEVEL_DEBUG, playlists);

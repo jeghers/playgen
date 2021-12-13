@@ -431,6 +431,7 @@
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
 							"    pm.expect(jsonData.result.description).to.eql(\"Test entry\");\r",
+							"    pm.expect(jsonData.result.songDetailsPluginName).to.eql(null);\r",
 							"    pm.expect(jsonData.result.songCount).to.eql(29);\r",
 							"});\r",
 							""
@@ -794,6 +795,122 @@
 					"path": [
 						"playlists",
 						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dir-test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.name).to.eql(\"dir-test\");\r",
+							"    pm.expect(jsonData.result.description).to.eql(\"A directory of stuff\");\r",
+							"    pm.expect(jsonData.result.songDetailsPluginName).to.eql(\"mp3Tags\");\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(7);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/dir-test",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dir-test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dir-test/songs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 7\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.count).to.eql(7);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Songs have details\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.songs[0].title).to.not.be.empty;\r",
+							"    pm.expect(jsonData.result.songs[0].artist).to.not.be.empty;\r",
+							"    pm.expect(jsonData.result.songs[0].album).to.not.be.empty;\r",
+							"    pm.expect(jsonData.result.songs[0].label).to.not.be.empty;\r",
+							"    pm.expect(jsonData.result.songs[0].year).to.not.be.empty;\r",
+							"    pm.expect(jsonData.result.songs[0].detailsLoaded).to.eql(true);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count header is 7\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('7');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Total-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Total-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total song count header is 7\", function () {\r",
+							"    var xTotalCount = pm.response.headers.get(\"X-Total-Count\");\r",
+							"    pm.expect(xTotalCount).to.eql('7');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/dir-test/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dir-test",
+						"songs"
 					]
 				}
 			},
