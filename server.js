@@ -6,7 +6,8 @@ const httpStatus = require('http-status-codes');
 
 const config = require('./app/config');
 const { setConfigForDb, dbInit } = require('./app/db');
-const { initAllPlugins } = require('./app/plugins/pluginUtils');
+const { pluginImpls } = require('./app/plugins/pluginImpls');
+const { setPluginImpls, initAllPlugins } = require('./app/plugins/pluginUtils');
 const { setConfigForUtils, log } = require('./app/utils');
 const { setConfigForPlaylist } = require('./app/Playlist');
 const { NOOP, ERROR, LOG_LEVEL_INFO } = require('./app/constants');
@@ -16,6 +17,7 @@ const port = process.env.PORT || config.session.port; // set our port
 setConfigForDb(config);
 setConfigForUtils(config);
 setConfigForPlaylist(config);
+setPluginImpls(pluginImpls);
 initAllPlugins(config);
 
 // wait until after plugins are initialized before trying to log anything
@@ -71,7 +73,6 @@ app.use('/api/v1/playlists', playlistsRoute);
 // catch all the rest as errors
 app.use((req, res) => {
   // special case of version mismatch
-  // if (/^\/api\/v[02-9a-zA-Z].*$/.test(req.url)) {
   if (/\/api\/v(?!1)/.test(req.url)) {
     res.status(httpStatus.NOT_IMPLEMENTED);
     res.json({ status: ERROR, message: 'Version not supported.' });

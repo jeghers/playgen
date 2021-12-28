@@ -12,8 +12,9 @@
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENV=development node server",
-    "start:debug-server": "cross-env NODE_ENV=development node debug server",
+    "start:debug-server": "cross-env NODE_ENV=development node --inspect-brk server",
     "start:prod": "cross-env NODE_ENV=production node server",
+    "start:sample-config-test": "cross-env NODE_ENV=development PLAYGEN_CONFIG_JSON=./sampleConfig.json node server",
     "lint": "npm run lint:js",
     "lint:eslint": "eslint server.js app",
     "lint:js": "npm run lint:eslint --"
@@ -73,6 +74,7 @@
     "lodash": "^4.17.21",
     "mysql": "^2.18.1",
     "mysql8": "^2.17.3",
+    "node-rsyslog": "^0.9.1",
     "node-windows": "^1.0.0-beta.6"
   },
   "devDependencies": {

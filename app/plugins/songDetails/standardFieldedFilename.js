@@ -1,6 +1,9 @@
 
+const PLUGIN_NAME = 'standardFieldedFilename';
+
 /* eslint-disable no-empty-function */
-const initPlugin = () => {}; // nothing needed
+const initPlugin = () => {
+}; // nothing needed
 
 const extract = songFilePath => {
   const index = songFilePath.lastIndexOf('/');
@@ -20,4 +23,4 @@ const extract = songFilePath => {
   return { title: songFilePath }; // bad but no other choice
 };
 
-module.exports = { initPlugin, extract };
+module.exports = { name: PLUGIN_NAME, initPlugin, extract };

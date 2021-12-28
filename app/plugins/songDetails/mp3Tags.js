@@ -4,8 +4,11 @@ const jsmediatags = require('jsmediatags');
 const { log } = require('../../utils');
 const { LOG_LEVEL_ERROR } = require('../../constants');
 
+const PLUGIN_NAME = 'mp3Tags';
+
 /* eslint-disable no-empty-function */
-const initPlugin = () => {}; // nothing needed
+const initPlugin = () => {
+}; // nothing needed
 
 const extract = songFilePath => {
   const o = { title: songFilePath, detailsLoaded: false };
@@ -26,4 +29,4 @@ const extract = songFilePath => {
   return o; // bad but no other choice
 };
 
-module.exports = { initPlugin, extract };
+module.exports = { name: PLUGIN_NAME, initPlugin, extract };

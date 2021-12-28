@@ -214,7 +214,7 @@ https://github.com/coreybutler/node-windows
 
 * Edit `windows-service-config.js` and adjust the configuration data
   to suit your needs.  Most importantly, set `script` to the proper
-  directory path.  You can optionally adjust other setting if you like
+  directory path.  You can optionally adjust other settings if you like
   (at your own risk).
   
 
@@ -256,7 +256,7 @@ https://github.com/coreybutler/node-windows
 
 In the source code folder `app/config` there is a configuration data structure that
 can be modified to your own needs (_at your own risk!_).  Most typically, you need to
-configure your MySQL database connection here, but there are other setting you might
+configure your MySQL database connection here, but there are other settings you might
 find useful as well.  For example, you can change logging behavior or customize plugins
 and their behavior.
 
@@ -271,6 +271,39 @@ There are three source files you can modify:
 The difference between development and production mode is entirely up to you; it depends
 on what changes you make to these configuration files.  Nothing else changes in how the JS
 code is executed at run time.
+
+### **Different ways to deploy "playgen"**
+
+You can deploy "playgen" either in "development" or "production" mode with
+the following `npm` options:
+
+| `npm` command        | NODE_ENV is set to this | Result |
+| -------------------- | ----------------------- | ------ |
+| `npm run start`      | `"development"`         | The settings in `config/development.js` are added to the default settings in `config/default.js` |
+| `npm run start:prod` | `"production"`          | The settings in `config/production.js` are added to the default settings in `config/default.js` |
+
+Depending on the settings of `config/development.js` and `config/production.js`,
+you can make 'development' and 'production' mode be configured however you want.
+You could point to a different database, use different plugins, change the logging
+levels; it's totally up to you.
+
+If you're writing custom plugin code, you can use `process.env.NODE_ENV` within
+that code to see what mode the software is running in.
+
+There is one more option: if you set the environment variable `PLAYGEN_CONFIG_JSON`
+to the path of an existing JSON file, it will be read and added to your
+configuration (unless errors occur while parsing the file).  You can use this
+option as another way to customize your configuration at runtime.  The data
+structure must match consistently with the config files data structure; any
+additional fields will be ignored.
+
+* A sample JSON configuration file `sampleConfig.json` is provided;
+  `npm run start:sample-config-test` will run "playgen" including that
+  custom configuration.  As an interesting example, it uses the `rsyslog`
+  plugin to send logging to a remote `rsyslog` server; you must have a
+  working `rsyslog` that accepts remote connections, and you must update
+  `sampleConfig.json` so that the plugin's `remoteHost` parameter is
+  set to your remote `rsyslog` server.
 
 ## **Unit Tests**
 
@@ -287,11 +320,13 @@ teach you how to use Postman.  You need to install Postman and learn how
 to use it.
 
 The file "`PlayGen tests.postman_collection.json`" can be used to import
-the Collection of Unit Tests into Postman.
+the Collection of Unit Tests into Postman.  The tests presume that the
+provided sample playlist data files exist and the MySQL database is populated
+with their information.
 
 For the Postman tests to work, the following environment variable must be
-set inside Postman.  The following table shows the required variable and
-sample values.  You'll probably need to adjust the directory paths.
+set inside Postman.  The following table shows the required variables and
+sample values.  You'll probably need to change the directory paths.
 
 | Variable               | Initial Value                | Current Value                |
 | ---------------------- | ---------------------------- | ---------------------------- |
@@ -332,16 +367,15 @@ describing that playlist.  The following columns are required in each row:
 
 ## **Playlist Filenames (and the "Standard Fielded Filename" format)**
 
-For "playgen" to use your song files, they must be named in a very specific way.
-Details about the songs are embedded into the songs filenames.  By having this
-metadata in the filenames, the song files themselves can be treated as totally
-content-agnostic, and there is no need for time-consuming scanning through the
-song files for any other information.  This avoids the complication of
-extracting metadata from MP3 tags (or whatever you might use for other file
-formats).
+For "playgen" to use your song files, by default they must be named in a very
+specific way.  Details about the songs are embedded into the songs filenames.
+By having this metadata in the filenames, the song files themselves can be
+treated as totally content-agnostic, and there is no need for time-consuming
+scanning through the song files for any other information.  This avoids the
+complication of extracting metadata from MP3 tags (or whatever you might use
+for other file formats).
 
-The following fields are placed in the name of the song file,
-separated by dashes:
+The following fields are placed in the name of the song file, separated by dashes:
 
 * Song Title
 * Artist Name
@@ -368,6 +402,8 @@ You'll probably want to make some automated shell script program to take new
 song files and convert them to this exact filename nomenclature.  That will
 save you a lot of bother over time.
 
+### ***Getting around the Standard Fielded Filename requirement***
+
 Standard Fielded Filenames are the default way of getting song details in
 "playgen".  While the initial renaming of your song files might be tedious,
 you benefit from much faster startup performance after that.  Of course, this
@@ -384,8 +420,7 @@ A "plugin" is a small module of Javascript code that is:
 * written by anyone, either me (the original developer) or you (the end user)
 * it conforms to a well-defined interface (it provides predefined functions
   to do certain required tasks)
-* you customize how the plugin does its assigned tasks by writing your own
-  custom logic
+* you customize how the plugin does those tasks by writing your own custom logic
 * The plugin is deployed into "playgen" by adding the code to the "playgen"
   source tree and registering it in the configuration file(s).
 * A default plugin is always provided with some reasonable built-in behaviors.
@@ -397,7 +432,9 @@ This plugin architecture will support the following things:
   messages to standard output using the Javascript console.  Available
   plugins included with playgen:
     * _console_ (default): send log messages to standard output via the Javascript `console` object
-    * _localFile_: send log messages to file of your choosing
+    * _localFile_: send log messages to a file of your choosing
+    * _rsyslog_: send log messages to a `rsyslog` server (uses a
+      `remoteHost` parameter to identify the server address)
 
 * **Song Details**: you can implement your own custom logic
   for extracting details like title, artist, album, etc.  The default plugin
@@ -431,13 +468,40 @@ If you make a nice (and good quality) plugin, consider sharing it with a PR.
 Once you have written a new plugin, you can register it with the following steps:
 
 * Your plugin code must be in a Javascript file whose name ends with `.js`.
+  * Starting implementation boilerplate files are provided for you to begin
+    with: `app/plugins/logging/loggingTemplate.js` and
+    `app/plugins/songDetails/songDetailsTemplate.js`.  You can make a copy
+    with a different name and fill in your own implementation code.
+  * Your plugin code must implement all the methods required for the type
+    of plugin (logging or songDetails).  See the implementation requirements
+    in the sections below.
+  * All plugins must implement `initPlugin`, which is common to all plugins.
+    If you have nothing to initialize, just provide an empty function.
+  * Be sure to export all the plugin methods, and also a `name` property.
+    This is important to the proper initialization of the plugin.  It should
+    look like this example:
+```
+        module.exports = {
+          name: 'myNewPlugin',
+          initPlugin,
+          log,
+        };
+```
 
 * Place that Javascript file in the appropriate source code directory: for logging
   plugins `app/plugins/logging`, or for song details plugins `app/plugins/songDetails`.
 
-* In the configuration data, import the new code with something like this example:
+* In the file `app/plugins/pluginImpls.js`, import the new code and add it to the
+  `pluginImpls` list with something like this example:
 ```
-    const myNewLoggingPlugin = require('../plugins/logging/myNewPlugin');
+    // import your plugin here
+    const myNewLoggingPlugin = require('./logging/myNewPlugin');
+       .
+       .
+    const pluginImpls = [
+      ... other plugins ...
+      myNewLoggingPlugin, <-- add your plugin to this list
+    ];
 ```
 
 * Under `config.plugins.logging` or `config.plugins.songDetails` (depending on your
@@ -446,7 +510,6 @@ Once you have written a new plugin, you can register it with the following steps
 ```
       {
         name: 'myNewPlugin', // what you'll name the plugin
-        pluginImpl: myNewLoggingPlugin, // the actual imported code
         params: [ // optional parameters, only if you need them in your code
           {
             name: 'myParam', // the name of your param
@@ -504,7 +567,7 @@ The returned data object must have the following fields:
 * title
 * artist
 * album
-* label (the record company)
+* label (the record company or publisher)
 * year
 
 If any of these fields are unavailable, you can omit them or set them to the

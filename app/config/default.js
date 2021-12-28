@@ -1,9 +1,4 @@
 
-const loggingConsolePlugin = require('../plugins/logging/console');
-const loggingLocalFilePlugin = require('../plugins/logging/localFile');
-const songDetailsSFFPlugin = require('../plugins/songDetails/standardFieldedFilename');
-const songDetailsMP3Plugin = require('../plugins/songDetails/mp3Tags');
-
 /* eslint-disable no-warning-comments */
 module.exports = {
   session: {
@@ -26,7 +21,6 @@ module.exports = {
     logging: [
       {
         name: 'console',
-        pluginImpl: loggingConsolePlugin,
         params: [
           {
             name: 'packJson',
@@ -37,7 +31,6 @@ module.exports = {
       },
       {
         name: 'localFile',
-        pluginImpl: loggingLocalFilePlugin,
         params: [
           {
             name: 'fileName',
@@ -53,12 +46,10 @@ module.exports = {
     songDetails: [
       {
         name: 'standardFieldedFilename',
-        pluginImpl: songDetailsSFFPlugin,
         default: true,
       },
       {
         name: 'mp3Tags',
-        pluginImpl: songDetailsMP3Plugin,
       },
     ],
   },

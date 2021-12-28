@@ -1,5 +1,13 @@
 
+const rsyslog = require('node-rsyslog');
 const _ = require('lodash');
+
+const { CRIT, ERROR, WARNING, INFO, DEBUG } = rsyslog.SEVERITY;
+const rsyslogOptions = {
+  // host is provided in plugin params
+  appname: 'playgen',
+  method: 'TCP',
+};
 
 const {
   LOG_LEVEL_FATAL_VALUE,
@@ -11,16 +19,22 @@ const {
   LOG_LEVELS,
 } = require('../../constants');
 
-const PLUGIN_NAME = 'console';
+const PLUGIN_NAME = 'rsyslog';
 
 let configLogLevelValue = LOG_LEVEL_INFO_VALUE;
+let remoteHost;
 let packJson;
+let logger;
 
 const initPlugin = (config, params) => {
   if (!_.isUndefined(config) && !_.isUndefined(config.plugins) && !_.isUndefined(config.plugins.logging)) {
     configLogLevelValue = LOG_LEVELS[config.logLevel];
+    const remoteHostParam = _.filter(params, { name: 'remoteHost' });
+    remoteHost = _.isEmpty(remoteHostParam) ? false : remoteHostParam[0].value;
+    rsyslogOptions.host = remoteHost;
     const packJsonParam = _.filter(params, { name: 'packJson' });
     packJson = _.isEmpty(packJsonParam) ? false : packJsonParam[0].value;
+    logger = new rsyslog.RSyslog(rsyslogOptions);
     log(LOG_LEVEL_INFO, `Set configLogLevelValue to ${_.toUpper(config.logLevel)} (${configLogLevelValue})`);
   }
 };
@@ -32,30 +46,32 @@ const log = (level, message) => {
     logLevelString = 'UNKNOWN LEVEL';
   }
   if (logLevelValue >= configLogLevelValue) {
-    let consoleFunction = console.log;
+    let rsyslogLevel = INFO;
     switch (logLevelValue) {
       case LOG_LEVEL_FATAL_VALUE:
+        rsyslogLevel = CRIT;
+        break;
       case LOG_LEVEL_ERROR_VALUE:
-        consoleFunction = console.error;
+        rsyslogLevel = ERROR;
         break;
       case LOG_LEVEL_WARNING_VALUE:
-        consoleFunction = console.warn;
+        rsyslogLevel = WARNING;
         break;
       case LOG_LEVEL_INFO_VALUE:
-        consoleFunction = console.info;
+        rsyslogLevel = INFO;
         break;
       case LOG_LEVEL_DEBUG_VALUE:
-        consoleFunction = console.debug;
+        rsyslogLevel = DEBUG;
         break;
       default:
         break;
     }
     const logMessagePrefix = `${new Date().toISOString()} ${logLevelString}`;
     if (typeof message === 'object') {
-      consoleFunction(`${logMessagePrefix}...`);
-      consoleFunction(JSON.stringify(message, null, packJson ? null : 1));
+      logger.send(rsyslogLevel, `${logMessagePrefix}...`);
+      logger.send(rsyslogLevel, JSON.stringify(message, null, packJson ? null : 1));
     } else {
-      consoleFunction(`${logMessagePrefix}: ${message}`);
+      logger.send(rsyslogLevel, `${logMessagePrefix}: ${message}`);
     }
   }
 };

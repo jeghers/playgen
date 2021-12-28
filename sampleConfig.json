@@ -1,0 +1,29 @@
+{
+  "session": {
+    "secure": true
+  },
+  "db": {
+    "reconnectTime": 5000
+  },
+  "plugins": {
+    "logging": [
+      {
+        "name": "rsyslog",
+        "params": [
+          {
+            "name": "remoteHost",
+            "value": "put-your-rsyslog-ip-here"
+          },
+          {
+            "name": "packJson",
+            "value": false
+          }
+        ],
+        "default": true
+      }
+    ]
+  },
+  "logType": "rsyslog",
+  "logLevel": "warning",
+  "runMode": "My Custom Run Mode"
+}

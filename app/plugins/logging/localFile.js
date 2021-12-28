@@ -9,6 +9,8 @@ const {
   DEFAULT_LOG_FILE_NAME,
 } = require('../../constants');
 
+const PLUGIN_NAME = 'localFile';
+
 let configLogLevelValue = LOG_LEVEL_INFO_VALUE; // default
 let logFileName;
 let logFileStream;
@@ -55,4 +57,4 @@ const log = (level, message) => {
   }
 };
 
-module.exports = { initPlugin, log };
+module.exports = { name: PLUGIN_NAME, initPlugin, log };
