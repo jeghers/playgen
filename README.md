@@ -596,14 +596,14 @@ option returns simple text instead of JSON for easier consumption by Liquidsoap.
 There may be a more elegant way to call the API from Liquidsoap, feel free to
 inform me if you know a better way.
 
-This example is a partial excerpt of a Liquidsoap 1.4 configuration file.  The
-code for Liquidsoap 2.0 might be slightly different.
+This example is a partial excerpt of a Liquidsoap 1.4 configuration file, that
+you can also use in Liquidsoap 2.0.
 
 ```
 playlistJingles = audio_to_stereo(playlist("~liquidsoap/playlists/jingles-playlist.txt"))
 
 def retro_request_function() =
-  result = get_process_output("curl 'http://localhost:3000/api/v1/playlists/retro/nextsong?format=text'")
+  result = http.get('http://localhost:3000/api/v1/playlists/retro/nextsong?format=text')
   log("Next song "^result)
   request.create(result)
 end
