@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const httpStatus = require('http-status-codes');
-// const logger = require('morgan');
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
+const _ = require('lodash');
 
-const { dbInit, getDb, playlists } = require('../db');
+const { initialDataLoad, getDb, getPlaylists, getPlaylist, setPlaylist, handleDbError } = require('../db');
 const { handleError, watchLoadFilePromise, log } = require('../utils');
 const { Playlist } = require('../Playlist');
 const {
@@ -24,14 +24,17 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // router.use(cookieParser());
 
 // get all the playlists
-// (accessed at GET http://localhost:<port>/api/v1/playlists)
+// (accessed at GET http://localhost:<port>/api/v1/playlists[?refresh=true])
 router.get('/', (req, res /* , next */) => {
   log(LOG_LEVEL_INFO, `/api/v1/playlists called with GET url = ${req.url}`);
+  const { refresh } = req.query;
+  if (!_.isUndefined(refresh) && (refresh === '' || refresh === 'true')) {
+    log(LOG_LEVEL_WARNING, 'Refresh all playlists!');
+    initialDataLoad();
+  }
   getDb().query('SELECT * FROM playlists', (err, rows) => {
     if (err) {
-      handleError(res, httpStatus.PRECONDITION_REQUIRED, ERROR, 'Error querying playlists - ' + err);
-      log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-      dbInit();
+      handleDbError(res, httpStatus.PRECONDITION_REQUIRED, ERROR, 'querying', null, err);
       return;
     }
 
@@ -41,7 +44,7 @@ router.get('/', (req, res /* , next */) => {
     const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
     for (let i = 0; i < rows.length; i++) {
       const name = rows[i].name;
-      const playlist = playlists[name];
+      const playlist = getPlaylist(name);
       let count = 0;
       if (playlist) {
         count = playlist.count();
@@ -51,7 +54,7 @@ router.get('/', (req, res /* , next */) => {
       log(LOG_LEVEL_DEBUG, `Playlist ${name} has ${count} songs`);
     }
     log(LOG_LEVEL_DEBUG, 'Global playlists:');
-    log(LOG_LEVEL_DEBUG, playlists);
+    log(LOG_LEVEL_DEBUG, getPlaylists());
     res.status(httpStatus.OK);
     res.header('X-Count', `${rows.length}`);
     res.json({ status: 'OK', result: rows, count: rows.length });
@@ -64,10 +67,7 @@ router.head('/', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, `/api/v1/playlists called with HEAD url = ${req.url}`);
   getDb().query('SELECT * FROM playlists', (err, rows) => {
     if (err) {
-      handleError(res, httpStatus.PRECONDITION_REQUIRED, ERROR,
-        'Error querying playlists - ' + err);
-      log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-      dbInit();
+      handleDbError(res, httpStatus.PRECONDITION_REQUIRED, ERROR, 'querying', null, err);
       return;
     }
 
@@ -134,10 +134,7 @@ router.post('/', (req, res /* , next */) => {
   getDb().query('INSERT INTO playlists SET ?',
     insertParams, (err /* , result */) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error creating playlist ' + name + ' - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'creating', name, err);
         return;
       }
 
@@ -145,9 +142,9 @@ router.post('/', (req, res /* , next */) => {
       const playlist = new Playlist(data);
       const promise = playlist.loadFile();
       watchLoadFilePromise(promise);
-      playlists[name] = playlist;
+      setPlaylist(name, playlist);
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
-      log(LOG_LEVEL_DEBUG, playlists);
+      log(LOG_LEVEL_DEBUG, getPlaylists());
       const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
       const uri = `${fullUrl}/${name}`;
       res.status(httpStatus.CREATED);
@@ -173,10 +170,7 @@ router.get('/:playlist_id', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error fetching playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, 'fetching', ERROR, playlistId, err);
         return;
       }
 
@@ -188,7 +182,7 @@ router.get('/:playlist_id', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           log(LOG_LEVEL_DEBUG, `    ${playlist.count()} songs`);
           rows[0].songCount = playlist.count();
@@ -197,7 +191,7 @@ router.get('/:playlist_id', (req, res /* , next */) => {
         }
 
         res.status(httpStatus.OK);
-        res.header('X-Count', `${playlist.count()}`);
+        res.header('X-Count', `${playlist ? playlist.count() : 0}`);
         res.json({ status: 'OK', result: rows[0] });
       }
     }
@@ -212,10 +206,7 @@ router.head('/:playlist_id', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error fetching playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'fetching', playlistId, err);
         return;
       }
 
@@ -227,7 +218,7 @@ router.head('/:playlist_id', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           log(LOG_LEVEL_DEBUG, `    ${playlist.count()} songs`);
           rows[0].songCount = playlist.count();
@@ -250,24 +241,23 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, 'req.body...');
   log(LOG_LEVEL_DEBUG, req.body);
   const playlistId = req.params.playlist_id;
-  const data = playlists[playlistId];
-  if (!data) {
+  const playlistData = getPlaylist(playlistId);
+  if (!playlistData) {
     handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
       'Playlist "' + playlistId + '" not found');
     return;
   }
-  const dataCopy = new Playlist(data);
+  const playlistDataCopy = new Playlist(playlistData);
   let updateQuery = 'UPDATE playlists SET ';
   const updateParams = [];
   let allValidFields = true;
   let fileChanged = false;
-  let someRedundantThresholdChanged = false; // rename this to something more meaningful
   if (req.body.filePath) {
     updateQuery += 'filePath = ?';
     updateParams.push(req.body.filePath);
-    dataCopy.filePath = req.body.filePath;
+    playlistDataCopy.filePath = req.body.filePath;
     log(LOG_LEVEL_DEBUG, `filePath = ${req.body.filePath}`);
-    if (data.filePath !== req.body.filePath) {
+    if (playlistData.filePath !== req.body.filePath) {
       fileChanged = true;
     }
   } else {
@@ -277,7 +267,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'description = ?';
     updateParams.push(req.body.description);
-    dataCopy.description = req.body.description;
+    playlistDataCopy.description = req.body.description;
     log(LOG_LEVEL_DEBUG, `description = ${req.body.description}`);
   } else {
     allValidFields = false;
@@ -288,18 +278,14 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   if (updateParams.length > 0) { updateQuery += ', '; }
   updateQuery += 'redundantTitleThreshold = ?';
   updateParams.push(req.body.redundantTitleThreshold);
-  dataCopy.redundantTitleThreshold = req.body.redundantTitleThreshold;
+  playlistDataCopy.redundantTitleThreshold = req.body.redundantTitleThreshold;
   log(LOG_LEVEL_DEBUG, `redundantTitleThreshold = ${req.body.redundantTitleThreshold}`);
-  if (data.redundantTitleThreshold !== req.body.redundantTitleThreshold) {
-    someRedundantThresholdChanged = true;
-  }
   if (req.body.partialTitleDelimiters) {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'partialTitleDelimiters = ?';
     updateParams.push(req.body.partialTitleDelimiters);
-    dataCopy.partialTitleDelimiters = req.body.partialTitleDelimiters;
+    playlistDataCopy.partialTitleDelimiters = req.body.partialTitleDelimiters;
     log(LOG_LEVEL_DEBUG, `partialTitleDelimiters = ${req.body.partialTitleDelimiters}`);
-    someRedundantThresholdChanged = true;
   } else {
     allValidFields = false;
   }
@@ -309,11 +295,8 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   if (updateParams.length > 0) { updateQuery += ', '; }
   updateQuery += 'redundantArtistThreshold = ?';
   updateParams.push(req.body.redundantArtistThreshold);
-  dataCopy.redundantArtistThreshold = req.body.redundantArtistThreshold;
+  playlistDataCopy.redundantArtistThreshold = req.body.redundantArtistThreshold;
   log(LOG_LEVEL_DEBUG, `redundantArtistThreshold = ${req.body.redundantArtistThreshold}`);
-  if (data.redundantArtistThreshold !== req.body.redundantArtistThreshold) {
-    someRedundantThresholdChanged = true;
-  }
 
   if (!allValidFields) {
     handleError(res, httpStatus.BAD_REQUEST, ERROR,
@@ -325,32 +308,24 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   updateParams.push(playlistId);
   log(LOG_LEVEL_DEBUG, `playlistId = ${playlistId}`);
 
-  getDb().query(
-    updateQuery, updateParams,
-    (err, result) => {
-      if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error updating playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
-        return;
-      }
-
-      log(LOG_LEVEL_DEBUG, `Changed ${result.changedRows} rows`);
-      playlists[playlistId] = dataCopy;
-      if (someRedundantThresholdChanged) {
-        dataCopy._clearSongHistory();
-      }
-      if (fileChanged) {
-        const promise = dataCopy.loadFile();
-        watchLoadFilePromise(promise);
-      }
-      log(LOG_LEVEL_DEBUG, 'Global playlists:');
-      log(LOG_LEVEL_DEBUG, playlists);
-      res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+  getDb().query(updateQuery, updateParams, (err, result) => {
+    if (err) {
+      handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'updating', playlistId, err);
+      return;
     }
-  );
+
+    log(LOG_LEVEL_DEBUG, `Changed ${result.changedRows} rows`);
+    setPlaylist(playlistId, playlistDataCopy);
+    if (fileChanged) {
+      const promise = playlistDataCopy.loadFile();
+      watchLoadFilePromise(promise);
+      playlistDataCopy._validateOldSongHistory();
+    }
+    log(LOG_LEVEL_DEBUG, 'Global playlists:');
+    log(LOG_LEVEL_DEBUG, getPlaylists());
+    res.status(httpStatus.OK);
+    res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+  });
 });
 
 // partially update an existing playlist
@@ -360,24 +335,23 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, 'req.body...');
   log(LOG_LEVEL_DEBUG, req.body);
   const playlistId = req.params.playlist_id;
-  const data = playlists[playlistId];
-  if (!data) {
+  const playlistData = getPlaylist(playlistId);
+  if (!playlistData) {
     handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
       'Playlist "' + playlistId + '" not found');
     return;
   }
-  const dataCopy = new Playlist(data);
+  const playlistDataCopy = new Playlist(playlistData);
   let updateQuery = 'UPDATE playlists SET ';
   const updateParams = [];
   let someValidFields = false;
   let fileChanged = false;
-  let someRedundantThresholdChanged = false;
   if (req.body.filePath) {
     updateQuery += 'filePath = ?';
     updateParams.push(req.body.filePath);
-    dataCopy.filePath = req.body.filePath;
+    playlistDataCopy.filePath = req.body.filePath;
     log(LOG_LEVEL_DEBUG, `filePath = ${req.body.filePath}`);
-    if (data.filePath !== req.body.filePath) {
+    if (playlistData.filePath !== req.body.filePath) {
       fileChanged = true;
     }
     someValidFields = true;
@@ -386,7 +360,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'description = ?';
     updateParams.push(req.body.description);
-    dataCopy.description = req.body.description;
+    playlistDataCopy.description = req.body.description;
     log(LOG_LEVEL_DEBUG, `description = ${req.body.description}`);
     someValidFields = true;
   }
@@ -394,28 +368,25 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'redundantTitleThreshold = ?';
     updateParams.push(req.body.redundantTitleThreshold);
-    dataCopy.redundantTitleThreshold = req.body.redundantTitleThreshold;
+    playlistDataCopy.redundantTitleThreshold = req.body.redundantTitleThreshold;
     log(LOG_LEVEL_DEBUG, `redundantTitleThreshold = ${req.body.redundantTitleThreshold}`);
     someValidFields = true;
-    someRedundantThresholdChanged = true;
   }
   if (req.body.partialTitleDelimiters) {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'partialTitleDelimiters = ?';
     updateParams.push(req.body.partialTitleDelimiters);
-    dataCopy.partialTitleDelimiters = req.body.partialTitleDelimiters;
+    playlistDataCopy.partialTitleDelimiters = req.body.partialTitleDelimiters;
     log(LOG_LEVEL_DEBUG, `partialTitleDelimiters = ${req.body.partialTitleDelimiters}`);
     someValidFields = true;
-    someRedundantThresholdChanged = true;
   }
   if (req.body.redundantArtistThreshold) {
     if (updateParams.length > 0) { updateQuery += ', '; }
     updateQuery += 'redundantArtistThreshold = ?';
     updateParams.push(req.body.redundantArtistThreshold);
-    dataCopy.redundantArtistThreshold = req.body.redundantArtistThreshold;
+    playlistDataCopy.redundantArtistThreshold = req.body.redundantArtistThreshold;
     log(LOG_LEVEL_DEBUG, `redundantArtistThreshold = ${req.body.redundantArtistThreshold}`);
     someValidFields = true;
-    someRedundantThresholdChanged = true;
   }
 
   if (!someValidFields) {
@@ -428,32 +399,24 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
   updateParams.push(playlistId);
   log(LOG_LEVEL_DEBUG, `playlistId = ${playlistId}`);
 
-  getDb().query(
-    updateQuery, updateParams,
-    (err, result) => {
-      if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error updating playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
-        return;
-      }
-
-      log(LOG_LEVEL_DEBUG, `Changed ${result.changedRows} rows`);
-      playlists[playlistId] = dataCopy;
-      if (someRedundantThresholdChanged) {
-        dataCopy._clearSongHistory();
-      }
-      if (fileChanged) {
-        const promise = dataCopy.loadFile();
-        watchLoadFilePromise(promise);
-      }
-      log(LOG_LEVEL_DEBUG, 'Global playlists:');
-      log(LOG_LEVEL_DEBUG, playlists);
-      res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+  getDb().query(updateQuery, updateParams, (err, result) => {
+    if (err) {
+      handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'updating', playlistId, err);
+      return;
     }
-  );
+
+    log(LOG_LEVEL_DEBUG, `Changed ${result.changedRows} rows`);
+    setPlaylist(playlistId, playlistDataCopy);
+    if (fileChanged) {
+      const promise = playlistDataCopy.loadFile();
+      watchLoadFilePromise(promise);
+      playlistDataCopy._validateOldSongHistory();
+    }
+    log(LOG_LEVEL_DEBUG, 'Global playlists:');
+    log(LOG_LEVEL_DEBUG, getPlaylists());
+    res.status(httpStatus.OK);
+    res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+  });
 });
 
 // delete an existing playlist
@@ -465,10 +428,7 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
     'DELETE FROM playlists WHERE name = ?',
     [ playlistId ], (err, result) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error deleting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'deleting', playlistId, err);
         return;
       }
 
@@ -478,9 +438,9 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
         return;
       }
       log(LOG_LEVEL_DEBUG, 'Deleted ' + result.affectedRows + ' rows');
-      delete playlists[playlistId];
+      delete getPlaylists()[playlistId];
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
-      log(LOG_LEVEL_DEBUG, playlists);
+      log(LOG_LEVEL_DEBUG, getPlaylists());
       res.status(httpStatus.OK);
       res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" deleted' });
     }

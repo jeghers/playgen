@@ -36,6 +36,10 @@ const watchLoadFilePromise = p => {
   }
 };
 
+const sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 let loggingErrorGiven = false;
 let globalLogType;
 
@@ -73,6 +77,7 @@ module.exports = {
   setConfigForUtils,
   handleError,
   watchLoadFilePromise,
+  sleep,
   log,
   extract,
 };

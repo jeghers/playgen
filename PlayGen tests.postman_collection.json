@@ -306,9 +306,9 @@
 							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 7\", function () {\r",
+							"pm.test(\"Playlist count is 8\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(7);\r",
+							"    pm.expect(jsonData.count).to.eql(8);\r",
 							"});\r",
 							""
 						],
@@ -346,9 +346,9 @@
 							"    pm.response.to.have.header(\"X-Count\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 7\", function () {\r",
+							"pm.test(\"Playlist count is 8\", function () {\r",
 							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
-							"    pm.expect(xCount).to.eql('7');\r",
+							"    pm.expect(xCount).to.eql('8');\r",
 							"});\r",
 							""
 						],
@@ -428,11 +428,13 @@
 							"});\r",
 							"\r",
 							"pm.test(\"Results are ok\", function () {\r",
+							"    var fileName = pm.environment.get(\"sample_playlist_file\").replace(/\\\\\\\\/g, \"\\\\\").replace(/\\\"/g, \"\");\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
 							"    pm.expect(jsonData.result.description).to.eql(\"Test entry\");\r",
 							"    pm.expect(jsonData.result.songDetailsPluginName).to.eql(null);\r",
 							"    pm.expect(jsonData.result.songCount).to.eql(29);\r",
+							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"});\r",
 							""
 						],
@@ -484,6 +486,47 @@
 			"request": {
 				"method": "HEAD",
 				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Allowed options are correct\", function () {\r",
+							"    var allow = pm.response.headers.get(\"Allow\");\r",
+							"    pm.expect(allow).to.eql('GET,HEAD,PUT,PATCH,DELETE');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
 				"url": {
 					"raw": "{{url}}/playlists/sample",
 					"host": [
@@ -570,7 +613,7 @@
 							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
 							"    pm.expect(jsonData.result.description).to.eql(\"Test entry (modified)\");\r",
 							"    pm.expect(jsonData.result.redundantArtistThreshold).to.eql(5);\r",
-							"    pm.expect(jsonData.result.songCount).to.eql(366);\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(337);\r",
 							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"\r",
 							"});\r",
@@ -597,6 +640,96 @@
 			"response": []
 		},
 		{
+			"name": "{{url}}/playlists/sample/songs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.count).to.eql(337);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample/nextsong",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "{{url}}/playlists/sample",
 			"event": [
 				{
@@ -606,6 +739,11 @@
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
+							"\r",
+							"const sleep = (ms) => {\r",
+							"  return new Promise(resolve => setTimeout(resolve, ms));\r",
+							"};\r",
+							"sleep(2000);\r",
 							""
 						],
 						"type": "text/javascript"
@@ -622,7 +760,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\t\"description\": \"Test entry (modified again)\",\r\n\t\"redundantTitleThreshold\": 10\r\n}\r\n"
+					"raw": "{\r\n\t\"filePath\": {{sample_playlist_file_3}},\r\n\t\"description\": \"Test entry (modified again)\",\r\n\t\"redundantTitleThreshold\": 10\r\n}\r\n"
 				},
 				"url": {
 					"raw": "{{url}}/playlists/sample",
@@ -654,11 +792,13 @@
 							"});\r",
 							"\r",
 							"pm.test(\"Results are ok\", function () {\r",
+							"    var fileName = pm.environment.get(\"sample_playlist_file_3\").replace(/\\\\\\\\/g, \"\\\\\").replace(/\\\"/g, \"\");\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.name).to.eql(\"sample\");\r",
 							"    pm.expect(jsonData.result.description).to.eql(\"Test entry (modified again)\");\r",
 							"    pm.expect(jsonData.result.redundantTitleThreshold).to.eql(10);\r",
-							"    pm.expect(jsonData.result.songCount).to.eql(366);\r",
+							"    pm.expect(jsonData.result.songCount).to.eql(9);\r",
+							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"});\r",
 							""
 						],
@@ -677,6 +817,193 @@
 					"path": [
 						"playlists",
 						"sample"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample/songs w/o refresh",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.count).to.eql(9);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/songs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"songs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample/songs w/ refresh",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.count).to.eql(9);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/songs?refresh",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"songs"
+					],
+					"query": [
+						{
+							"key": "refresh",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample/nextsong 2nd time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/sample/history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"sample\");\r",
+							"    pm.expect(jsonData.result.history).to.exist;\r",
+							"    pm.expect(jsonData.result.count).to.eql(2);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/sample/history",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"sample",
+						"history"
 					]
 				}
 			},
@@ -734,9 +1061,9 @@
 							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 6\", function () {\r",
+							"pm.test(\"Playlist count is 7\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(6);\r",
+							"    pm.expect(jsonData.count).to.eql(7);\r",
 							"});\r",
 							""
 						],
@@ -754,47 +1081,6 @@
 					],
 					"path": [
 						"playlists"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/playlists/sample",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Allowed options are correct\", function () {\r",
-							"    var allow = pm.response.headers.get(\"Allow\");\r",
-							"    pm.expect(allow).to.eql('GET,HEAD,PUT,PATCH,DELETE');\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "OPTIONS",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": []
-				},
-				"url": {
-					"raw": "{{url}}/playlists/sample",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"playlists",
-						"sample"
 					]
 				}
 			},
@@ -1177,49 +1463,7 @@
 							"pm.test(\"Results are ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{url}}/playlists/crimson/nextsong",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"playlists",
-						"crimson",
-						"nextsong"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/playlists/crimson/nextsong Copy",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Status is OK\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Results are ok\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
 							"});\r",
 							""
 						],
@@ -1263,6 +1507,7 @@
 							"pm.test(\"Results are ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
 							"});\r",
 							""
 						],
@@ -1306,6 +1551,51 @@
 							"pm.test(\"Results are ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/crimson/nextsong",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"nextsong"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/nextsong 4th time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are ok\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
 							"});\r",
 							""
 						],
@@ -1391,6 +1681,7 @@
 							"pm.test(\"Results are ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData.result.playlist).to.eql(\"crimson\");\r",
+							"    pm.expect(jsonData.result.song).to.exist;\r",
 							"});\r",
 							""
 						],
@@ -1855,7 +2146,7 @@
 			"response": []
 		},
 		{
-			"name": "{{url}}/playlists/crimson/requests Copy",
+			"name": "{{url}}/playlists/crimson/requests 2nd time",
 			"event": [
 				{
 					"listen": "test",

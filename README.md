@@ -322,7 +322,9 @@ to use it.
 The file "`PlayGen tests.postman_collection.json`" can be used to import
 the Collection of Unit Tests into Postman.  The tests presume that the
 provided sample playlist data files exist and the MySQL database is populated
-with their information.
+with their information.  Your song files must be under directory paths
+that are correct in the playlist text files and DB tables too; if tests
+fail, try checking for correct directory paths.
 
 For the Postman tests to work, the following environment variable must be
 set inside Postman.  The following table shows the required variables and
@@ -764,6 +766,7 @@ _Sample response body_
   "message": "Playlist \"sample\" updated"
 }
 ```
+If the `filePath` value is changed, the playlist will be reloaded.
 
 #### PATCH http://somehost:3000/api/v1/playlists/{playlist}
 
@@ -784,6 +787,7 @@ _Sample response body_
   "message": "Playlist \"sample\" updated"
 }
 ```
+If the `filePath` value is changed, the playlist will be reloaded.
 
 #### DELETE http://somehost:3000/api/v1/playlists/{playlist}
 
@@ -845,6 +849,8 @@ _Sample response body_
   }
 }
 ```
+By adding the option `?refresh=true` (or abbreviated `?refresh`) you can force
+the playlist to reload the song list from its data file or directory.
 
 #### HEAD http://somehost:3000/api/v1/playlists/{playlist}/songs
 

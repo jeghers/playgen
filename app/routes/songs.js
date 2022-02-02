@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const httpStatus = require('http-status-codes');
-// const logger = require('morgan');
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 const _ = require('lodash');
 
-const { dbInit, getDb, playlists } = require('../db');
-const { handleError, log } = require('../utils');
+const { getDb, setPlaylist, getPlaylist, handleDbError } = require('../db');
+const { initPlaylist, preserveHistoriesFromPlaylist } = require('../Playlist');
+const { handleError, sleep, log } = require('../utils');
 const {
   ERROR,
   NOTFOUND,
@@ -24,17 +24,14 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // router.use(cookieParser());
 
 // get all the songs in a given playlist
-// (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/songs)
+// (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/songs[?refresh=true])
 router.get('/', (req, res /* , next */) => {
   log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/songs called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
-    [ playlistId ], (err, rows) => {
+    [ playlistId ], async (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -44,8 +41,27 @@ router.get('/', (req, res /* , next */) => {
       if (rows.length === 0) {
         handleError(res, httpStatus.NOT_FOUND, NOTFOUND, `Playlist "${playlistId}" not found`);
       } else {
-        log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const { name } = rows[0];
+        log(LOG_LEVEL_DEBUG, name);
+        let playlist = getPlaylist(name);
+        const { refresh } = req.query;
+        if (!_.isUndefined(refresh) && (refresh === '' || refresh === 'true')) {
+          log(LOG_LEVEL_WARNING, 'Refresh this playlists songs!');
+          setPlaylist(name, initPlaylist(rows[0]));
+          playlist = preserveHistoriesFromPlaylist(getPlaylist(name), playlist);
+          // wait for file data to be loaded
+          let waitAttempts = 25; // 5 seconds
+          while (!playlist._fileLoaded && waitAttempts > 0) {
+            /* eslint-disable no-await-in-loop */
+            await sleep(200);
+            waitAttempts -= 1;
+          }
+          if (waitAttempts === 0) {
+            log(LOG_LEVEL_WARNING, 'Waited 5 seconds and file data is still not loaded');
+          } else {
+            log(LOG_LEVEL_INFO, 'File data is finally loaded');
+          }
+        }
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
@@ -98,10 +114,7 @@ router.head('/', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -113,7 +126,7 @@ router.head('/', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
@@ -167,10 +180,7 @@ router.get('/:song_index', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -182,7 +192,7 @@ router.get('/:song_index', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._songsToPlay) || (!playlist._fileLoaded)) {
             handleError(res, httpStatus.NO_CONTENT, NOCONTENT,

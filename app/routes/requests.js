@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const httpStatus = require('http-status-codes');
-// const logger = require('morgan');
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 const _ = require('lodash');
 
-const { dbInit, getDb, playlists } = require('../db');
+const { getDb, getPlaylist, handleDbError } = require('../db');
 const { handleError, log } = require('../utils');
 const {
   ERROR,
@@ -15,7 +14,6 @@ const {
   CONFLICT,
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
-  LOG_LEVEL_WARNING,
   LOG_LEVEL_ERROR,
 } = require('../constants');
 
@@ -42,10 +40,7 @@ router.post('/', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -56,7 +51,7 @@ router.post('/', (req, res /* , next */) => {
         handleError(res, httpStatus.NOT_FOUND, NOTFOUND, 'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           const playlistCount = playlist.count();
           if (songIndex >= playlistCount) {
@@ -98,10 +93,7 @@ router.get('/', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -113,7 +105,7 @@ router.get('/', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._priorityRequests) || (!playlist._fileLoaded)) {
             res.json({
@@ -161,10 +153,7 @@ router.head('/', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -175,7 +164,7 @@ router.head('/', (req, res /* , next */) => {
         handleError(res, httpStatus.NOT_FOUND, NOTFOUND, 'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._priorityRequests) || (!playlist._fileLoaded)) {
             res.json({
@@ -215,10 +204,7 @@ router.get('/:request_index', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -230,7 +216,7 @@ router.get('/:request_index', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._priorityRequests)) {
             handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
@@ -280,10 +266,7 @@ router.delete('/:request_index', (req, res /* , next */) => {
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
-        handleError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR,
-          'Error getting playlist "' + playlistId + '" - ' + err);
-        log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-        dbInit();
+        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'getting', playlistId, err);
         return;
       }
 
@@ -295,7 +278,7 @@ router.delete('/:request_index', (req, res /* , next */) => {
           'Playlist "' + playlistId + '" not found');
       } else {
         log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = playlists[rows[0].name];
+        const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._priorityRequests)) {
             handleError(res, httpStatus.NO_CONTENT, NOCONTENT,
