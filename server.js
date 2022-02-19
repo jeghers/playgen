@@ -61,6 +61,7 @@ const nextSongRoute = require('./app/routes/nextsong');
 const songsRoute = require('./app/routes/songs');
 const requestsRoute = require('./app/routes/requests');
 const playlistsRoute = require('./app/routes/playlists');
+const healthCheckRoute = require('./app/routes/healthCheck');
 
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here
 app.use('/api/v1/playlists/:playlist_id/history', historyRoute);
@@ -69,6 +70,7 @@ app.use('/api/v1/playlists/:playlist_id/nextsong', nextSongRoute);
 app.use('/api/v1/playlists/:playlist_id/songs', songsRoute);
 app.use('/api/v1/playlists/:playlist_id/requests', requestsRoute);
 app.use('/api/v1/playlists', playlistsRoute);
+app.use('/api/v1/healthcheck', healthCheckRoute);
 
 // catch all the rest as errors
 app.use((req, res) => {

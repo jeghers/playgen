@@ -26,7 +26,7 @@
     },
     {
       "name": "jingles",
-      "filePath": "E:\\src\\playgen\\playlists\\jingles-playlist.txt",
+      "filePath": "E:\\src\\playgen\\jingles-playlist.txt",
       "description": "All of the jingles",
       "redundantTitleThreshold": 0,
       "partialTitleDelimiters": "",
