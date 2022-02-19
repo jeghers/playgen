@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:12.22-alpine3.15
 
 MAINTAINER mark.jeghers@gmail.com
 

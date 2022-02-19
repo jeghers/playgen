@@ -1,4 +1,5 @@
 const mysql = require('mysql8');
+const _ = require('lodash');
 
 const { initPlaylist } = require('./Playlist');
 const { log, sleep, handleError } = require('./utils');
@@ -13,6 +14,7 @@ const {
 let db = null;
 let config;
 let playlists;
+let initialPlaylistsLoaded = false;
 
 const setConfigForDb = configToInstall => {
   config = configToInstall;
@@ -82,8 +84,56 @@ const initialDataLoad = () => {
         playlists[playlist.name] = playlist;
       }
     }
+    initialPlaylistsLoaded = true;
     log(LOG_LEVEL_DEBUG, 'Global playlists:');
     log(LOG_LEVEL_DEBUG, playlists);
+  });
+};
+
+const pingDb = resultCallback => {
+  log(LOG_LEVEL_INFO, 'Pinging the database...');
+  let retries = 5;
+  db.query('SELECT 1', (err, /* rows */) => {
+    if (err) {
+      // no initial data
+      log(LOG_LEVEL_ERROR, `Error pinging the database - ${err}`);
+      sleep(config.healthCheckRetryTime).then(() => {
+        db.end((/* err */) => {
+          // The connection is terminated now
+          if (retries > 0) {
+            retries -= 1;
+            pingDb(); // retry
+          } else {
+            resultCallback(false, 'Cannot reach the database');
+          }
+        });
+      });
+      return;
+    }
+
+    // healthCheckFlag = true;
+    let reason;
+    if (initialPlaylistsLoaded) {
+      let allPlaylistsReady = true;
+      _.forEach(playlists, playlist => {
+        if (!playlist._fileLoaded) {
+          reason = `Playlist '${playlist.name}' is not fully loaded yet`;
+          log(LOG_LEVEL_INFO, reason);
+          allPlaylistsReady = false;
+          return false;
+        }
+        return true;
+      });
+      if (allPlaylistsReady) {
+        reason = 'All playlists fully loaded';
+        log(LOG_LEVEL_INFO, reason);
+      }
+      resultCallback(allPlaylistsReady, reason); // all playlists must be fully loaded up
+    } else {
+      reason = 'Initial playlist query not done yet';
+      log(LOG_LEVEL_INFO, reason);
+      resultCallback(false, reason);
+    }
   });
 };
 
@@ -100,6 +150,7 @@ const handleDbError = (res, httpStatusCode, errorType, actionVerb, playlistId, e
 module.exports = {
   setConfigForDb,
   dbInit,
+  pingDb,
   initialDataLoad,
   getDb: () => db,
   getPlaylists: () => playlists,

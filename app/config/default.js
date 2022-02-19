@@ -55,5 +55,6 @@ module.exports = {
   },
   logType: 'console',
   logLevel: 'info',
+  healthCheckRetryTime: 5000,
   isWindowsService: process.env.IS_WINDOWS_SERVICE === 'true',
 };

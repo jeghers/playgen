@@ -25,5 +25,6 @@
   },
   "logType": "rsyslog",
   "logLevel": "warning",
+  "healthCheckRetryTime": 10000,
   "runMode": "My Custom Run Mode"
 }

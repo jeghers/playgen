@@ -85,7 +85,7 @@ router.post('/', (req, res /* , next */) => {
   );
 });
 
-// get all the songs in a given playlist
+// get all the song requests in a given playlist
 // (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.get('/', (req, res /* , next */) => {
   log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/requests called with GET url = ${req.url}`);
@@ -108,6 +108,8 @@ router.get('/', (req, res /* , next */) => {
         const playlist = getPlaylist(rows[0].name);
         if (playlist) {
           if ((!playlist._priorityRequests) || (!playlist._fileLoaded)) {
+            res.status(httpStatus.OK);
+            res.header('X-Count', '0');
             res.json({
               status: 'OK',
               result: { playlist: playlistId, requests: [], count: 0 }
@@ -145,7 +147,7 @@ router.get('/', (req, res /* , next */) => {
   );
 });
 
-// get song metadata for a given playlist
+// get song metadata for the requests of a given playlist
 // (accessed at HEAD http://localhost:<port>/api/v1/playlists/:playlist_id/requests)
 router.head('/', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/requests called with HEAD url = ${req.url}`);

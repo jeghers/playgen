@@ -98,12 +98,13 @@ class Playlist {
               files.forEach((file, index) => {
                 thisPlaylist._processLine(`${thisPlaylist.filePath}/${file}`, index);
               });
-              thisPlaylist._fileLoaded = true;
               thisPlaylist._songCount =
                 (thisPlaylist._songsToPlay) ? thisPlaylist._songsToPlay.length : 0;
               if (thisPlaylist._songCount > 0) {
                 thisPlaylist._buildRandomIndex();
               }
+              thisPlaylist._fileLoaded = true;
+              log(LOG_LEVEL_INFO, `Playlist "${thisPlaylist.name}" song count is ${thisPlaylist._songCount}`);
               resolve(thisPlaylist);
             }
             catch (err) {
@@ -149,12 +150,12 @@ class Playlist {
         thisPlaylist._processLine(remaining, lineIndex);
       }
       else {
-        thisPlaylist._fileLoaded = true;
         thisPlaylist._songCount =
           (thisPlaylist._songsToPlay) ? thisPlaylist._songsToPlay.length : 0;
         if (thisPlaylist._songCount > 0) {
           thisPlaylist._buildRandomIndex();
         }
+        thisPlaylist._fileLoaded = true;
         log(LOG_LEVEL_INFO, `Playlist "${thisPlaylist.name}" song count is ${thisPlaylist._songCount}`);
         resolve(thisPlaylist);
       }
