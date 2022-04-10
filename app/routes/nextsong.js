@@ -25,8 +25,8 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // the playlist with that id (accessed at
 // GET http://localhost:<port>/api/playlists/:playlist_id/nextsong[?format=text])
 router.get('/', (req, res /* , next */) => {
-  log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/nextsong called with GET url = ${req.url}`);
   const playlistId = req.params.playlist_id;
+  log(LOG_LEVEL_INFO, `/api/v1/playlists/${playlistId}/nextsong called with GET url = ${req.url}`);
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
       if (err) {
@@ -57,11 +57,11 @@ router.get('/', (req, res /* , next */) => {
           res.status(httpStatus.OK);
           if ((req.query.format) && (req.query.format === 'text')) {
             log(LOG_LEVEL_DEBUG, 'Return text instead of JSON');
-            log(LOG_LEVEL_DEBUG, `next.song.file = ' + ${next.song.file}`);
             res.type('text/plain');
             res.send(next.song.file); // text only
           }
           else { res.json({ status: 'OK', result: next }); }
+          log(LOG_LEVEL_INFO, `next.song.file = ${next.song.file}`);
         }
         else {
           handleError(res, httpStatus.NOT_FOUND, NOTFOUND,

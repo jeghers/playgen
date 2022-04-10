@@ -19,5 +19,7 @@ COPY . .
 
 EXPOSE 3000
 
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s CMD node healthcheck.js
+
 CMD [ "node", "server.js" ]
 
