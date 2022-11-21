@@ -11,7 +11,7 @@ const initPlugin = (config, params) => {
   // needs some initialization, implement it here
 };
 
-const extract = songFilePath => {
+const extractSongInfo = songFilePath => {
   const o = { title: songFilePath, detailsLoaded: false };
   // use your own logic to add these additional fields to the object:
   // o.title = the song title
@@ -24,4 +24,4 @@ const extract = songFilePath => {
 };
 
 // make sure the export has the plugin name and all the implemented methods
-module.exports = { name: PLUGIN_NAME, initPlugin, extract };
+module.exports = { name: PLUGIN_NAME, initPlugin, extractSongInfo };

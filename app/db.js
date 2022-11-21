@@ -91,7 +91,7 @@ const initialDataLoad = () => {
 };
 
 const pingDb = resultCallback => {
-  log(LOG_LEVEL_INFO, 'Pinging the database...');
+  log(LOG_LEVEL_DEBUG, 'Pinging the database...');
   let retries = 5;
   db.query('SELECT 1', (err, /* rows */) => {
     if (err) {

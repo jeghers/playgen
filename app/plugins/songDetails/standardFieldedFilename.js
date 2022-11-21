@@ -5,7 +5,7 @@ const PLUGIN_NAME = 'standardFieldedFilename';
 const initPlugin = () => {
 }; // nothing needed
 
-const extract = songFilePath => {
+const extractSongInfo = songFilePath => {
   const index = songFilePath.lastIndexOf('/');
   if (index > -1) {
     const fileName = songFilePath.substring(index + 1)
@@ -23,4 +23,4 @@ const extract = songFilePath => {
   return { title: songFilePath }; // bad but no other choice
 };
 
-module.exports = { name: PLUGIN_NAME, initPlugin, extract };
+module.exports = { name: PLUGIN_NAME, initPlugin, extractSongInfo };
