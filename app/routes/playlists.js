@@ -9,6 +9,8 @@ const { initialDataLoad, getDb, getPlaylists, getPlaylist, setPlaylist, handleDb
 const { handleError, watchLoadFilePromise, log } = require('../utils');
 const { Playlist } = require('../Playlist');
 const {
+  GET,
+  OK,
   ERROR,
   NOTFOUND,
   LOG_LEVEL_DEBUG,
@@ -23,10 +25,12 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));
 // router.use(cookieParser());
 
+const validPlaylistName = name => name.indexOf('-') === -1;
+
 // get all the playlists
-// (accessed at GET http://localhost:<port>/api/v1/playlists[?refresh=true])
+// (accessed at GET/HEAD http://localhost:<port>/api/v1/playlists[?refresh=true])
 router.get('/', (req, res /* , next */) => {
-  log(LOG_LEVEL_INFO, `/api/v1/playlists called with GET url = ${req.url}`);
+  log(LOG_LEVEL_INFO, `/api/v1/playlists called with ${req.method} url = ${req.url}`);
   const { refresh } = req.query;
   if (!_.isUndefined(refresh) && (refresh === '' || refresh === 'true')) {
     log(LOG_LEVEL_WARNING, 'Refresh all playlists!');
@@ -41,43 +45,25 @@ router.get('/', (req, res /* , next */) => {
     log(LOG_LEVEL_NONE, 'Data received from DB:');
     log(LOG_LEVEL_NONE, rows);
 
-    const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-    for (let i = 0; i < rows.length; i++) {
-      const name = rows[i].name;
-      const playlist = getPlaylist(name);
-      let count = 0;
-      if (playlist) {
-        count = playlist.count();
-        rows[i].songCount = count;
-        rows[i].uri = `${fullUrl}/${name}`;
+    if (req.method === GET) {
+      const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+      for (let i = 0; i < rows.length; i++) {
+        const name = rows[i].name;
+        const playlist = getPlaylist(name);
+        let count = 0;
+        if (playlist) {
+          count = playlist.count();
+          rows[i].songCount = count;
+          rows[i].uri = `${fullUrl}/${name}`;
+        }
+        log(LOG_LEVEL_DEBUG, `Playlist ${name} has ${count} songs`);
       }
-      log(LOG_LEVEL_DEBUG, `Playlist ${name} has ${count} songs`);
+      log(LOG_LEVEL_DEBUG, 'Global playlists:');
+      log(LOG_LEVEL_DEBUG, getPlaylists());
     }
-    log(LOG_LEVEL_DEBUG, 'Global playlists:');
-    log(LOG_LEVEL_DEBUG, getPlaylists());
     res.status(httpStatus.OK);
     res.header('X-Count', `${rows.length}`);
-    res.json({ status: 'OK', result: rows, count: rows.length });
-  });
-});
-
-// get playlists metadata
-// (accessed at HEAD http://localhost:<port>/api/v1/playlists)
-router.head('/', (req, res /* , next */) => {
-  log(LOG_LEVEL_DEBUG, `/api/v1/playlists called with HEAD url = ${req.url}`);
-  getDb().query('SELECT * FROM playlists', (err, rows) => {
-    if (err) {
-      handleDbError(res, httpStatus.PRECONDITION_REQUIRED, ERROR, 'querying', null, err);
-      return;
-    }
-
-    log(LOG_LEVEL_NONE, 'Data received from DB:');
-    log(LOG_LEVEL_NONE, rows);
-
-    log(LOG_LEVEL_DEBUG, `Total of ${rows.length} playlists`);
-    res.status(httpStatus.OK);
-    res.header('X-Count', `${rows.length}`);
-    res.end();
+    res.json({ status: OK, result: rows, count: rows.length });
   });
 });
 
@@ -92,6 +78,11 @@ router.post('/', (req, res /* , next */) => {
   if (!req.body.name) {
     handleError(res, httpStatus.BAD_REQUEST, ERROR,
       'Error creating playlist - no name given');
+    return;
+  }
+  if (!validPlaylistName(req.body.name)) {
+    handleError(res, httpStatus.BAD_REQUEST, ERROR,
+      'Error creating playlist - name cannot include dash "-" characters');
     return;
   }
   const insertParams = { name: req.body.name };
@@ -149,7 +140,7 @@ router.post('/', (req, res /* , next */) => {
       const uri = `${fullUrl}/${name}`;
       res.status(httpStatus.CREATED);
       res.set('Location', uri);
-      res.json({ status: 'OK', uri, message: 'Playlist "' + name + '" created' });
+      res.json({ status: OK, uri, message: 'Playlist "' + name + '" created' });
     });
 });
 
@@ -163,9 +154,9 @@ router.options('/', (req, res /* , next */) => {
 });
 
 // get playlist by id
-// (accessed at GET http://localhost:<port>/api/v1/playlists/:playlist_id)
+// (accessed at GET/HEAD http://localhost:<port>/api/v1/playlists/:playlist_id)
 router.get('/:playlist_id', (req, res /* , next */) => {
-  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id called with GET url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id called with ${req.method} url = ${req.url}`);
   const playlistId = req.params.playlist_id;
   getDb().query('SELECT * FROM playlists Where name = ?',
     [ playlistId ], (err, rows) => {
@@ -181,54 +172,20 @@ router.get('/:playlist_id', (req, res /* , next */) => {
         handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
           'Playlist "' + playlistId + '" not found');
       } else {
-        log(LOG_LEVEL_DEBUG, rows[0].name);
         const playlist = getPlaylist(rows[0].name);
-        if (playlist) {
-          log(LOG_LEVEL_DEBUG, `    ${playlist.count()} songs`);
-          rows[0].songCount = playlist.count();
-        } else {
-          rows[0].songCount = 0;
+        if (req.method === GET) {
+          log(LOG_LEVEL_DEBUG, rows[0].name);
+          if (playlist) {
+            log(LOG_LEVEL_DEBUG, `    ${playlist.count()} songs`);
+            rows[0].songCount = playlist.count();
+          } else {
+            rows[0].songCount = 0;
+          }
         }
 
         res.status(httpStatus.OK);
         res.header('X-Count', `${playlist ? playlist.count() : 0}`);
-        res.json({ status: 'OK', result: rows[0] });
-      }
-    }
-  );
-});
-
-// get playlist metadata by id
-// (accessed at HEAD http://localhost:<port>/api/v1/playlists/:playlist_id)
-router.head('/:playlist_id', (req, res /* , next */) => {
-  log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id called with HEAD url = ${req.url}`);
-  const playlistId = req.params.playlist_id;
-  getDb().query('SELECT * FROM playlists Where name = ?',
-    [ playlistId ], (err, rows) => {
-      if (err) {
-        handleDbError(res, httpStatus.INTERNAL_SERVER_ERROR, ERROR, 'fetching', playlistId, err);
-        return;
-      }
-
-      log(LOG_LEVEL_DEBUG, 'Data received from DB:');
-      log(LOG_LEVEL_DEBUG, rows);
-
-      if (rows.length === 0) {
-        handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
-          'Playlist "' + playlistId + '" not found');
-      } else {
-        log(LOG_LEVEL_DEBUG, rows[0].name);
-        const playlist = getPlaylist(rows[0].name);
-        if (playlist) {
-          log(LOG_LEVEL_DEBUG, `    ${playlist.count()} songs`);
-          rows[0].songCount = playlist.count();
-        } else {
-          rows[0].songCount = 0;
-        }
-
-        res.status(httpStatus.OK);
-        res.header('X-Count', `${playlist.count()}`);
-        res.end();
+        res.json({ status: OK, result: rows[0] });
       }
     }
   );
@@ -324,7 +281,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
     log(LOG_LEVEL_DEBUG, 'Global playlists:');
     log(LOG_LEVEL_DEBUG, getPlaylists());
     res.status(httpStatus.OK);
-    res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+    res.json({ status: OK, message: 'Playlist "' + playlistId + '" updated' });
   });
 });
 
@@ -415,7 +372,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
     log(LOG_LEVEL_DEBUG, 'Global playlists:');
     log(LOG_LEVEL_DEBUG, getPlaylists());
     res.status(httpStatus.OK);
-    res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" updated' });
+    res.json({ status: OK, message: 'Playlist "' + playlistId + '" updated' });
   });
 });
 
@@ -442,7 +399,7 @@ router.delete('/:playlist_id', (req, res /* , next */) => {
       log(LOG_LEVEL_DEBUG, 'Global playlists:');
       log(LOG_LEVEL_DEBUG, getPlaylists());
       res.status(httpStatus.OK);
-      res.json({ status: 'OK', message: 'Playlist "' + playlistId + '" deleted' });
+      res.json({ status: OK, message: 'Playlist "' + playlistId + '" deleted' });
     }
   );
 });

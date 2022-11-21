@@ -10,7 +10,7 @@ const PLUGIN_NAME = 'mp3Tags';
 const initPlugin = () => {
 }; // nothing needed
 
-const extract = songFilePath => {
+const extractSongInfo = songFilePath => {
   const o = { title: songFilePath, detailsLoaded: false };
   jsmediatags.read(songFilePath, {
     onSuccess: tagInfo => {
@@ -29,4 +29,4 @@ const extract = songFilePath => {
   return o; // bad but no other choice
 };
 
-module.exports = { name: PLUGIN_NAME, initPlugin, extract };
+module.exports = { name: PLUGIN_NAME, initPlugin, extractSongInfo };

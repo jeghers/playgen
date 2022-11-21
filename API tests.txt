@@ -60,3 +60,16 @@ HEAD http://localhost:3000/api/v1/playlists/crimson/history
 OPTIONS http://localhost:3000/api/v1/playlists/crimson/history
 GET http://localhost:3000/api/v1/playlists/crimson/history/2
 OPTIONS http://localhost:3000/api/v1/playlists/crimson/history/2
+GET http://localhost:3000/api/v1/downloads
+HEAD http://localhost:3000/api/v1/downloads
+OPTIONS http://localhost:3000/api/v1/downloads
+POST http://localhost:3000/api/v1/playlists/crimson/downloads
+{
+    "songIndex": 3
+}
+GET http://localhost:3000/api/v1/playlists/crimson/downloads
+HEAD http://localhost:3000/api/v1/playlists/crimson/downloads
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/downloads
+GET http://localhost:3000/api/v1/playlists/crimson/downloads/2
+OPTIONS http://localhost:3000/api/v1/playlists/crimson/downloads/2
+DELETE http://localhost:3000/api/v1/playlists/crimson/downloads/2

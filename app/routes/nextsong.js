@@ -8,6 +8,8 @@ const _ = require('lodash');
 const { getDb, getPlaylist, handleDbError } = require('../db');
 const { handleError, log } = require('../utils');
 const {
+  GET,
+  OK,
   ERROR,
   NOTFOUND,
   NOCONTENT,
@@ -60,7 +62,7 @@ router.get('/', (req, res /* , next */) => {
             res.type('text/plain');
             res.send(next.song.file); // text only
           }
-          else { res.json({ status: 'OK', result: next }); }
+          else { res.json({ status: OK, result: next }); }
           log(LOG_LEVEL_INFO, `next.song.file = ${next.song.file}`);
         }
         else {
@@ -77,7 +79,7 @@ router.get('/', (req, res /* , next */) => {
 router.options('/', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, `/api/v1/playlists/:playlist_id/nextsong called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
-  res.header('Allow', 'GET');
+  res.header('Allow', GET);
   res.end();
 });
 

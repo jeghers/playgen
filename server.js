@@ -6,6 +6,7 @@ const httpStatus = require('http-status-codes');
 
 const config = require('./app/config');
 const { setConfigForDb, dbInit } = require('./app/db');
+const { startDownloadCleanupService } = require('./app/downloads');
 const { pluginImpls } = require('./app/plugins/pluginImpls');
 const { setPluginImpls, initAllPlugins } = require('./app/plugins/pluginUtils');
 const { setConfigForUtils, log } = require('./app/utils');
@@ -41,7 +42,7 @@ defaultRouter.use((req, res, next) => {
 });
 
 // test route to make sure everything is working
-// (accessed at GET http://localhost:<port>/api)
+// (accessed at GET/HEAD http://localhost:<port>/api)
 defaultRouter.get('/', (req, res) => {
   res.json({ status: NOOP, message: 'Welcome to the \'playgen\' api.' });
 });
@@ -55,21 +56,25 @@ defaultRouter.get('/v1', (req, res) => {
 // register our routes -------------------------------
 app.use('/api', defaultRouter);
 
-const historyRoute = require('./app/routes/history');
+const playlistsRoute = require('./app/routes/playlists');
 const currentSongRoute = require('./app/routes/currentsong');
 const nextSongRoute = require('./app/routes/nextsong');
 const songsRoute = require('./app/routes/songs');
 const requestsRoute = require('./app/routes/requests');
-const playlistsRoute = require('./app/routes/playlists');
+const historyRoute = require('./app/routes/history');
+const downloadsRoute = require('./app/routes/downloads');
+const downloadsGlobalRoute = require('./app/routes/downloadsGlobal');
 const healthCheckRoute = require('./app/routes/healthCheck');
 
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here
-app.use('/api/v1/playlists/:playlist_id/history', historyRoute);
 app.use('/api/v1/playlists/:playlist_id/currentsong', currentSongRoute);
 app.use('/api/v1/playlists/:playlist_id/nextsong', nextSongRoute);
 app.use('/api/v1/playlists/:playlist_id/songs', songsRoute);
 app.use('/api/v1/playlists/:playlist_id/requests', requestsRoute);
+app.use('/api/v1/playlists/:playlist_id/history', historyRoute);
+app.use('/api/v1/playlists/:playlist_id/downloads', downloadsRoute);
 app.use('/api/v1/playlists', playlistsRoute);
+app.use('/api/v1/downloads', downloadsGlobalRoute);
 app.use('/api/v1/healthcheck', healthCheckRoute);
 
 // catch all the rest as errors
@@ -83,6 +88,8 @@ app.use((req, res) => {
   res.status(httpStatus.NOT_FOUND);
   res.json({ status: ERROR, message: 'Sorry can\'t find that!' });
 });
+
+startDownloadCleanupService();
 
 // start the server
 // =============================================================================

@@ -8,12 +8,14 @@ const _ = require('lodash');
 const { getDb, getPlaylist, handleDbError } = require('../db');
 const { handleError, log } = require('../utils');
 const {
+  GET,
   ERROR,
   NOTFOUND,
   NOCONTENT,
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
   LOG_LEVEL_ERROR,
+  OK,
 } = require('../constants');
 
 // router.use(logger('combined')); // was 'dev'
@@ -57,7 +59,7 @@ router.get('/', (req, res /* , next */) => {
           }
           current.song.uri = `${req.protocol}://${req.get('host')}${req.originalUrl.replace('currentsong', 'songs')}/${current.index}`;
           res.status(httpStatus.OK);
-          res.json({ status: 'OK', result: current });
+          res.json({ status: OK, result: current });
         }
         else {
           handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
@@ -73,7 +75,7 @@ router.get('/', (req, res /* , next */) => {
 router.options('/', (req, res /* , next */) => {
   log(LOG_LEVEL_INFO, `/api/v1/playlists/:playlist_id/currentsong called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
-  res.header('Allow', 'GET');
+  res.header('Allow', GET);
   res.end();
 });
 

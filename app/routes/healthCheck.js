@@ -6,11 +6,7 @@ const bodyParser = require('body-parser');
 
 const { pingDb } = require('../db');
 const { log } = require('../utils');
-const {
-  LOG_LEVEL_DEBUG,
-  LOG_LEVEL_INFO,
-  LOG_LEVEL_ERROR,
-} = require('../constants');
+const { GET, LOG_LEVEL_DEBUG, LOG_LEVEL_ERROR } = require('../constants');
 
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
@@ -18,9 +14,9 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // router.use(cookieParser());
 
 // get all the healthCheck
-// (accessed at GET http://localhost:<port>/api/v1/healthCheck)
+// (accessed at GET/HEAD http://localhost:<port>/api/v1/healthCheck)
 router.get('/', (req, res /* , next */) => {
-  log(LOG_LEVEL_INFO, `/api/v1/healthCheck called with GET url = ${req.url}`);
+  log(LOG_LEVEL_DEBUG, `/api/v1/healthCheck called with GET url = ${req.url}`);
   pingDb((healthCheckFlag, reasonText) => {
     if (healthCheckFlag) {
       res.status(httpStatus.OK);
@@ -37,7 +33,7 @@ router.get('/', (req, res /* , next */) => {
 router.options('/', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, `/api/v1/healthCheck called with OPTIONS url = ${req.url}`);
   res.status(httpStatus.OK);
-  res.header('Allow', 'GET');
+  res.header('Allow', GET);
   res.end();
 });
 

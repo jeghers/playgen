@@ -21,6 +21,7 @@ const handleError = (res, status, error, message) => {
   log(LOG_LEVEL_ERROR, '****** handleError');
   log(LOG_LEVEL_ERROR, message);
   res.status(status);
+  // JSON content might not be returned depending on the status code
   res.json({ status: error, message: message });
 };
 
@@ -63,12 +64,12 @@ const log = (level, message, plugin) => {
   }
 };
 
-const extract = (songFilePath, plugin) => {
+const extractSongInfo = (songFilePath, plugin) => {
   const pluginToUse = plugin || getDefaultPlugin(PLUGIN_TYPE_SONG_DETAILS);
   if (!_.isUndefined(pluginToUse.pluginImpl) &&
-      !_.isUndefined(pluginToUse.pluginImpl.extract) &&
+      !_.isUndefined(pluginToUse.pluginImpl.extractSongInfo) &&
       !_.isUndefined(songFilePath)) {
-    return pluginToUse.pluginImpl.extract(songFilePath);
+    return pluginToUse.pluginImpl.extractSongInfo(songFilePath);
   }
   return false;
 };
@@ -79,5 +80,5 @@ module.exports = {
   watchLoadFilePromise,
   sleep,
   log,
-  extract,
+  extractSongInfo,
 };

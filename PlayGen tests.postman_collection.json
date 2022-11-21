@@ -2,7 +2,8 @@
 	"info": {
 		"_postman_id": "3315e860-8636-48e3-9050-a7ff4cd830a7",
 		"name": "PlayGen tests",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "532122"
 	},
 	"item": [
 		{
@@ -347,9 +348,9 @@
 							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 8\", function () {\r",
+							"pm.test(\"Playlist count is 9\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(8);\r",
+							"    pm.expect(jsonData.count).to.eql(9);\r",
 							"});\r",
 							""
 						],
@@ -387,9 +388,9 @@
 							"    pm.response.to.have.header(\"X-Count\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 8\", function () {\r",
+							"pm.test(\"Playlist count is 9\", function () {\r",
 							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
-							"    pm.expect(xCount).to.eql('8');\r",
+							"    pm.expect(xCount).to.eql('9');\r",
 							"});\r",
 							""
 						],
@@ -1102,9 +1103,9 @@
 							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 7\", function () {\r",
+							"pm.test(\"Playlist count is 8\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(7);\r",
+							"    pm.expect(jsonData.count).to.eql(8);\r",
 							"});\r",
 							""
 						],
@@ -1128,7 +1129,7 @@
 			"response": []
 		},
 		{
-			"name": "{{url}}/playlists/dir-test",
+			"name": "{{url}}/playlists/dirTest",
 			"event": [
 				{
 					"listen": "test",
@@ -1145,7 +1146,7 @@
 							"\r",
 							"pm.test(\"Results are ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.result.name).to.eql(\"dir-test\");\r",
+							"    pm.expect(jsonData.result.name).to.eql(\"dirTest\");\r",
 							"    pm.expect(jsonData.result.description).to.eql(\"A directory of stuff\");\r",
 							"    pm.expect(jsonData.result.songDetailsPluginName).to.eql(\"mp3Tags\");\r",
 							"    pm.expect(jsonData.result.songCount).to.eql(7);\r",
@@ -1160,20 +1161,20 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/playlists/dir-test",
+					"raw": "{{url}}/playlists/dirTest",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"playlists",
-						"dir-test"
+						"dirTest"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "{{url}}/playlists/dir-test/songs",
+			"name": "{{url}}/playlists/dirTest/songs",
 			"event": [
 				{
 					"listen": "test",
@@ -1230,13 +1231,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/playlists/dir-test/songs",
+					"raw": "{{url}}/playlists/dirTest/songs",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"playlists",
-						"dir-test",
+						"dirTest",
 						"songs"
 					]
 				}
@@ -1796,7 +1797,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
+							"pm.test(\"Status code is 201\", function () {\r",
 							"    pm.response.to.have.status(201);\r",
 							"});\r",
 							"\r",
@@ -2135,6 +2136,60 @@
 			"response": []
 		},
 		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 1\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('1');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "{{url}}/playlists/crimson/nextSong",
 			"event": [
 				{
@@ -2214,6 +2269,60 @@
 			},
 			"request": {
 				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/requests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"X-Count is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Count\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Song count is 0\", function () {\r",
+							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
+							"    pm.expect(xCount).to.eql('0');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "HEAD",
 				"header": [],
 				"body": {
 					"mode": "raw",
@@ -2478,6 +2587,1193 @@
 						"crimson",
 						"history",
 						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads 1st",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 201) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 201\", function () {\r",
+							"        pm.expect(code).to.eql(201);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest\");\r",
+							"        pm.expect(jsonData.result.songToDownload.index).to.eql(3);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest2/downloads 2nd",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 201) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 201\", function () {\r",
+							"        pm.expect(code).to.eql(201);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest2\");\r",
+							"        pm.expect(jsonData.result.songToDownload.index).to.eql(7);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 7\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest2/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest2",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest2/downloads 2nd error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([409, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 7\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest2/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest2",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads 3rd",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 201) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 201\", function () {\r",
+							"        pm.expect(code).to.eql(201);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest\");\r",
+							"        pm.expect(jsonData.result.songToDownload.index).to.eql(6);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 6\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest2/downloads 4th",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 201) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 201\", function () {\r",
+							"        pm.expect(code).to.eql(201);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest2\");\r",
+							"        pm.expect(jsonData.result.songToDownload.index).to.eql(4);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest2/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest2",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads 5th",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 201) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 201\", function () {\r",
+							"        pm.expect(code).to.eql(201);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest\");\r",
+							"        pm.expect(jsonData.result.songToDownload.index).to.eql(4);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/crimson/downloads error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([204, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"songIndex\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/crimson/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"crimson",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        var playlist0 = jsonData.result.playlists[0];\r",
+							"        pm.expect(playlist0.downloadsCount).to.eql(3);\r",
+							"        var playlist1 = jsonData.result.playlists[1];\r",
+							"        pm.expect(playlist1.downloadsCount).to.eql(2);\r",
+							"        pm.expect(jsonData.result.playlistCount).to.eql(2);\r",
+							"        pm.expect(jsonData.result.downloadLinksTotalCount).to.eql(5);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"X-Playlist-Count is present\", function () {\r",
+							"        pm.response.to.have.header(\"X-Playlist-Count\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Playlist count is 2\", function () {\r",
+							"        var xPlaylistCount = pm.response.headers.get(\"X-Playlist-Count\");\r",
+							"        var count = parseInt(xPlaylistCount);\r",
+							"        pm.expect(count).to.eql(2);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"X-DownloadLinks-Total-Count is present\", function () {\r",
+							"        pm.response.to.have.header(\"X-DownloadLinks-Total-Count\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Download links count is 5\", function () {\r",
+							"        var xDownloadLinksTotalCount = pm.response.headers.get(\"X-DownloadLinks-Total-Count\");\r",
+							"        var count = parseInt(xDownloadLinksTotalCount);\r",
+							"        pm.expect(count).to.eql(5);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Allowed options are correct\", function () {\r",
+							"        var allow = pm.response.headers.get(\"Allow\");\r",
+							"        pm.expect(allow).to.eql('GET,HEAD');\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        var playlist0 = jsonData.result.playlists[0];\r",
+							"        pm.expect(playlist0.downloadsCount).to.eql(3);\r",
+							"        pm.expect(jsonData.result.playlistCount).to.eql(1);\r",
+							"        pm.expect(jsonData.result.downloadLinksTotalCount).to.eql(3);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"X-Playlist-Count is present\", function () {\r",
+							"        pm.response.to.have.header(\"X-Playlist-Count\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Playlist count is 1\", function () {\r",
+							"        var xPlaylistCount = pm.response.headers.get(\"X-Playlist-Count\");\r",
+							"        var count = parseInt(xPlaylistCount);\r",
+							"        pm.expect(count).to.eql(1);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"X-DownloadLinks-Total-Count is present\", function () {\r",
+							"        pm.response.to.have.header(\"X-DownloadLinks-Total-Count\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Download links count is 3\", function () {\r",
+							"        var xDownloadLinksTotalCount = pm.response.headers.get(\"X-DownloadLinks-Total-Count\");\r",
+							"        var count = parseInt(xDownloadLinksTotalCount);\r",
+							"        pm.expect(count).to.eql(3);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Allowed options are correct\", function () {\r",
+							"        var allow = pm.response.headers.get(\"Allow\");\r",
+							"        pm.expect(allow).to.eql('POST,GET,HEAD');\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads/1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlist).to.eql(\"dirTest\");\r",
+							"        pm.expect(jsonData.result.downloadIndex).to.eql(1);\r",
+							"        pm.expect(jsonData.result.song.index).to.eql(4);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads/1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Allowed options are correct\", function () {\r",
+							"        var allow = pm.response.headers.get(\"Allow\");\r",
+							"        pm.expect(allow).to.eql('GET,HEAD,DELETE');\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads/1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        var playlist0 = jsonData.result.playlists[0];\r",
+							"        pm.expect(playlist0.downloadsCount).to.eql(2);\r",
+							"        pm.expect(jsonData.result.playlistCount).to.eql(1);\r",
+							"        pm.expect(jsonData.result.downloadLinksTotalCount).to.eql(2);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads/1 again",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest/downloads/0",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest/downloads/0",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest",
+						"downloads",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest2/downloads/0",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest2/downloads/0",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest2",
+						"downloads",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/playlists/dirTest2/downloads/0 again",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/playlists/dirTest2/downloads/0",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"playlists",
+						"dirTest2",
+						"downloads",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/downloads empty",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var code = pm.response.code;\r",
+							"\r",
+							"if (code !== 200) {\r",
+							"    pm.test(\"Status code is 503 (downloads disabled)\", function () {\r",
+							"        pm.expect(code).to.eql(503);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.expect(code).to.eql(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Status is OK\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.status).to.eql(\"OK\");\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Results are ok\", function () {\r",
+							"        var jsonData = pm.response.json();\r",
+							"        pm.expect(jsonData.result.playlistCount).to.eql(0);\r",
+							"        pm.expect(jsonData.result.downloadLinksTotalCount).to.eql(0);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/downloads",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"downloads"
 					]
 				}
 			},

@@ -1,0 +1,6 @@
+This file is not a download link.   It is here as a demonstration
+of the ability of "playgen" to skip over and ignore extra files
+in the downloads directory that are not links to downloads.
+
+Do not remove this file.  It's here to demonstrate "playgen"
+behavior when extra files are present.
