@@ -102,7 +102,9 @@ const pingDb = resultCallback => {
           // The connection is terminated now
           if (retries > 0) {
             retries -= 1;
-            pingDb(); // retry
+            log(LOG_LEVEL_ERROR, 'Retry after sleeping');
+            dbInit();
+            pingDb(resultCallback); // retry
           } else {
             resultCallback(false, 'Cannot reach the database');
           }
