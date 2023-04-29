@@ -14,6 +14,8 @@ const { setConfigForPlaylist } = require('./app/Playlist');
 const { NOOP, ERROR, LOG_LEVEL_INFO } = require('./app/constants');
 
 const port = process.env.PORT || config.session.port; // set our port
+const serverVersion = '1.0.0';
+const apiVersion = 'v1';
 
 setConfigForDb(config);
 setConfigForUtils(config);
@@ -50,7 +52,18 @@ defaultRouter.get('/', (req, res) => {
 // test route to make sure everything is working
 // (accessed at GET http://localhost:<port>/api/v1)
 defaultRouter.get('/v1', (req, res) => {
-  res.json({ status: NOOP, message: 'V1 is the current version.' });
+  res.json({ status: NOOP, message: 'v1 is the current API version.' });
+});
+
+// current version of the playgen service
+// (accessed at GET http://localhost:<port>/api/version)
+defaultRouter.get('/version', (req, res) => {
+  res.json({
+    status: NOOP,
+    serverVersion,
+    apiVersion,
+    message: `${serverVersion} is the current playgen server version, ${apiVersion} is the current API version`,
+  });
 });
 
 // register our routes -------------------------------
@@ -79,7 +92,7 @@ app.use('/api/v1/healthcheck', healthCheckRoute);
 
 // catch all the rest as errors
 app.use((req, res) => {
-  // special case of version mismatch
+  // special case of API version mismatch
   if (/\/api\/v(?!1)/.test(req.url)) {
     res.status(httpStatus.NOT_IMPLEMENTED);
     res.json({ status: ERROR, message: 'Version not supported.' });
