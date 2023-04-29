@@ -8,6 +8,9 @@ CREATE TABLE `playlists` (
     PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+GET http://localhost:3000/api/v1/version
+GET http://localhost:3000/api/v1/healthcheck
+
 GET http://localhost:3000/api/v1/playlists
 HEAD http://localhost:3000/api/v1/playlists
 POST http://localhost:3000/api/v1/playlists

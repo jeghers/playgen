@@ -7,6 +7,47 @@
 	},
 	"item": [
 		{
+			"name": "{{url_root}}/version",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is READY\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"READY\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is correct\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.reason).to.eql(\"All playlists fully loaded\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}/version",
+					"host": [
+						"{{url_root}}"
+					],
+					"path": [
+						"version"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "{{url}}/healthcheck",
 			"event": [
 				{
@@ -48,7 +89,7 @@
 			"response": []
 		},
 		{
-			"name": "{url_root}",
+			"name": "{{url_root}}",
 			"event": [
 				{
 					"listen": "test",
@@ -86,7 +127,7 @@
 			"response": []
 		},
 		{
-			"name": "{url_root}/v1",
+			"name": "{{url_root}}/v1",
 			"event": [
 				{
 					"listen": "test",
@@ -127,7 +168,7 @@
 			"response": []
 		},
 		{
-			"name": "{url_root}/v9",
+			"name": "{{url_root}}/v9",
 			"event": [
 				{
 					"listen": "test",
@@ -168,7 +209,7 @@
 			"response": []
 		},
 		{
-			"name": "{url_root}/bad_path",
+			"name": "{{url_root}}/bad_path",
 			"event": [
 				{
 					"listen": "test",
@@ -209,7 +250,7 @@
 			"response": []
 		},
 		{
-			"name": "{url}/bad_path",
+			"name": "{{url}}/bad_path",
 			"event": [
 				{
 					"listen": "test",
@@ -2946,8 +2987,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 204 or 503 (service unavailable)\", function () {\r",
-							"    pm.expect(pm.response.code).to.be.oneOf([204, 503]);\r",
+							"pm.test(\"Status code is 404 or 503 (service unavailable)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([404, 503]);\r",
 							"});\r",
 							""
 						],
@@ -2960,7 +3001,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"songIndex\": 10\r\n}",
+					"raw": "{\r\n    \"songIndex\": 1000\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
