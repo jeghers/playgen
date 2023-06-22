@@ -7,47 +7,6 @@
 	},
 	"item": [
 		{
-			"name": "{{url_root}}/version",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Status is READY\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.status).to.eql(\"READY\");\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Reason is correct\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.reason).to.eql(\"All playlists fully loaded\");\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{url_root}}/version",
-					"host": [
-						"{{url_root}}"
-					],
-					"path": [
-						"version"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "{{url}}/healthcheck",
 			"event": [
 				{
@@ -83,6 +42,50 @@
 					],
 					"path": [
 						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url_root}}/version",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is READY\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql(\"READY\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Versions are valid\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.serverVersion).not.eql(undefined);\r",
+							"    pm.expect(jsonData.serverVersion.length).to.be.greaterThan(0);\r",
+							"    pm.expect(jsonData.apiVersion).not.eql(undefined);\r",
+							"    pm.expect(jsonData.apiVersion.length).to.be.greaterThan(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_root}}/version",
+					"host": [
+						"{{url_root}}"
+					],
+					"path": [
+						"version"
 					]
 				}
 			},
@@ -144,7 +147,7 @@
 							"\r",
 							"pm.test(\"Message is ok\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.message).to.eql(\"V1 is the current version.\");\r",
+							"    pm.expect(jsonData.message).to.eql(\"v1 is the current API version.\");\r",
 							"});\r",
 							""
 						],
@@ -291,6 +294,55 @@
 			"response": []
 		},
 		{
+			"name": "{url}/management/config",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Config data is valid\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.serverVersion).not.eql(undefined);\r",
+							"    pm.expect(jsonData.serverVersion.length).to.be.greaterThan(0);\r",
+							"    pm.expect(jsonData.apiVersion).not.eql(undefined);\r",
+							"    pm.expect(jsonData.apiVersion.length).to.be.greaterThan(0);\r",
+							"    pm.expect(jsonData.config).not.eql(undefined);\r",
+							"    pm.expect(jsonData.config.session).not.eql(undefined);\r",
+							"    pm.expect(jsonData.config.db).not.eql(undefined);\r",
+							"    pm.expect(jsonData.config.playlists).not.eql(undefined);\r",
+							"    pm.expect(jsonData.config.downloads).not.eql(undefined);\r",
+							"    pm.expect(jsonData.config.plugins).not.eql(undefined);\r",
+							"    pm.expect(jsonData.vaultInfo).not.eql(undefined);\r",
+							"    pm.expect(jsonData.vaultInfo.initialized).not.eql(undefined);\r",
+							"    pm.expect(jsonData.vaultInfo.sealed).not.eql(undefined);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/management/config",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"management",
+						"config"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "{{url}}/playlists/sample",
 			"event": [
 				{
@@ -389,9 +441,15 @@
 							"    pm.expect(jsonData.result.filePath).to.eql(fileName);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 9\", function () {\r",
+							"let expectedPlaylistCount =\r",
+							"    7 +\r",
+							"    pm.response.json().result.filter(\r",
+							"        playlist => playlist.name.startsWith(\"dirTest\")\r",
+							"    ).length;\r",
+							"pm.globals.set(\"expectedPlaylistCount\", expectedPlaylistCount);\r",
+							"pm.test(`Playlist count is ${expectedPlaylistCount}`, function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(9);\r",
+							"    pm.expect(jsonData.count).to.eql(expectedPlaylistCount);\r",
 							"});\r",
 							""
 						],
@@ -431,7 +489,8 @@
 							"\r",
 							"pm.test(\"Playlist count is 9\", function () {\r",
 							"    var xCount = pm.response.headers.get(\"X-Count\");\r",
-							"    pm.expect(xCount).to.eql('9');\r",
+							"    const expectedPlaylistCount = pm.globals.get(\"expectedPlaylistCount\");\r",
+							"    pm.expect(xCount).to.eql(`${expectedPlaylistCount}`);\r",
 							"});\r",
 							""
 						],
@@ -1144,9 +1203,14 @@
 							"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Playlist count is 8\", function () {\r",
+							"let expectedPlaylistCount =\r",
+							"    6 +\r",
+							"    pm.response.json().result.filter(\r",
+							"        playlist => playlist.name.startsWith(\"dirTest\")\r",
+							"    ).length;\r",
+							"pm.test(`Playlist count is ${expectedPlaylistCount}`, function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.count).to.eql(8);\r",
+							"    pm.expect(jsonData.count).to.eql(expectedPlaylistCount);\r",
 							"});\r",
 							""
 						],

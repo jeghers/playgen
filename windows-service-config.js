@@ -2,7 +2,7 @@
 const serviceConfig = {
   name: 'Playgen',
   description: 'Playgen random 24/7 playlist generator',
-  // you will eed to change this script path
+  // you will need to change this script path
   script: 'D:\\src\\playgen\\server.js',
   nodeOptions: [],
   env: [

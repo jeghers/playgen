@@ -7,9 +7,10 @@ module.exports = {
   },
   db: {
     host: 'localhost',
-    user: 'some_user',
-    password: 'some_password',
-    database: 'some_db_schema',
+    user: 'root',
+    port: 3306,
+    password: 'your_db_password',
+    database: 'your_db_schema',
     reconnectTime: 1000,
   },
   playlists: {

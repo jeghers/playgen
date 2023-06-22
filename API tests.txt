@@ -10,6 +10,7 @@ CREATE TABLE `playlists` (
 
 GET http://localhost:3000/api/v1/version
 GET http://localhost:3000/api/v1/healthcheck
+GET http://localhost:3000/api/v1/management/config
 
 GET http://localhost:3000/api/v1/playlists
 HEAD http://localhost:3000/api/v1/playlists

@@ -6,18 +6,17 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 
 const config = require('../config');
-const {
-  getAllSymLinks,
-} = require('../downloads');
-const { log, handleError } = require('../utils');
+
 const {
   OK,
   UNAVAILABLE,
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
-  LOG_LEVEL_ERROR,
 } = require('../constants');
+const { getAllSymLinks } = require('../downloads');
+const { log, handleError } = require('../utils');
 
+const { routeNotFoundHandler, routeErrorHandler } = require('./utils');
 const downloadsEnabled = config.downloads.enabled && !_.isUndefined(config.downloads.downloadsPath);
 
 // router.use(logger('combined')); // was 'dev'
@@ -67,15 +66,7 @@ router.options('/', (req, res /* , next */) => {
   res.end();
 });
 
-router.use((req, res) => {
-  res.status(httpStatus.NOT_FOUND).send('Sorry can\'t find that!');
-});
-
-router.use((error, req, res) => {
-  // can this be modularized?
-  log(LOG_LEVEL_ERROR, '/v1/playlists/:playlist_id/downloads had an error');
-  log(LOG_LEVEL_ERROR, error.stack);
-  res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something broke!');
-});
+router.use(routeNotFoundHandler);
+router.use(routeErrorHandler);
 
 module.exports = router;

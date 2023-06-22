@@ -20,38 +20,39 @@ const setConfigForDb = configToInstall => {
   config = configToInstall;
 };
 
-const dbInit = () => {
+const initDb = () => {
 
   // First you need to create a connection to the db
   db = mysql.createConnection({
     host: config.db.host,
+    port: config.db.port,
     user: config.db.user,
     password: config.db.password,
     database: config.db.database
   });
 
-  db.connect((err) => {
-    if (err) {
-      log(LOG_LEVEL_ERROR, `Error connecting to DB - ${err}`);
+  db.connect(error => {
+    if (error) {
+      log(LOG_LEVEL_ERROR, `Error connecting to DB - ${error}`);
       return;
     }
     log(LOG_LEVEL_INFO, 'Connection established');
   });
   // If you're also serving http, display a 503 error.
-  db.on('error', (err) => {
-    log(LOG_LEVEL_ERROR, `DB error - ${err}`);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+  db.on('error', error => {
+    log(LOG_LEVEL_ERROR, `DB error - ${error}`);
+    if (error.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
       sleep(config.db.reconnectTime).then(() => {  // lost due to either server restart, or a
-        dbInit();                                  // connection idle timeout (the wait_timeout
+        initDb();                                  // connection idle timeout (the wait_timeout
       });                                          // server variable configures this)
     } else {
-      throw err;
+      throw error;
     }
   });
 
   initialDataLoad();
 
-  /* db.end((err) => {
+  /* db.end((error) => {
       // The connection is terminated gracefully
       // Ensures all previously enqueued queries are still
       // before sending a COM_QUIT packet to the MySQL server.
@@ -60,14 +61,14 @@ const dbInit = () => {
 
 const initialDataLoad = () => {
   playlists = {};
-  db.query('SELECT * FROM playlists', (err, rows) => {
-    if (err) {
+  db.query('SELECT * FROM playlists', (error, rows) => {
+    if (error) {
       // no initial data
-      log(LOG_LEVEL_ERROR, `Error querying initial playlists - ${err}`);
+      log(LOG_LEVEL_ERROR, `Error querying initial playlists - ${error}`);
       sleep(config.db.reconnectTime).then(() => {
-        db.end((/* err */) => {
+        db.end((/* error */) => {
           // The connection is terminated now
-          dbInit(); // retry
+          initDb(); // retry
         });
       });
       return;
@@ -93,17 +94,17 @@ const initialDataLoad = () => {
 const pingDb = resultCallback => {
   log(LOG_LEVEL_DEBUG, 'Pinging the database...');
   let retries = 5;
-  db.query('SELECT 1', (err, /* rows */) => {
-    if (err) {
+  db.query('SELECT 1', (error, /* rows */) => {
+    if (error) {
       // no initial data
-      log(LOG_LEVEL_ERROR, `Error pinging the database - ${err}`);
+      log(LOG_LEVEL_ERROR, `Error pinging the database - ${error}`);
       sleep(config.healthCheckRetryTime).then(() => {
-        db.end((/* err */) => {
+        db.end((/* error */) => {
           // The connection is terminated now
           if (retries > 0) {
             retries -= 1;
             log(LOG_LEVEL_ERROR, 'Retry after sleeping');
-            dbInit();
+            initDb();
             pingDb(resultCallback); // retry
           } else {
             resultCallback(false, 'Cannot reach the database');
@@ -140,18 +141,18 @@ const pingDb = resultCallback => {
 };
 
 /* eslint-disable max-params */
-const handleDbError = (res, httpStatusCode, errorType, actionVerb, playlistId, err) => {
+const handleDbError = (res, httpStatusCode, errorType, actionVerb, playlistId, error) => {
   const message = playlistId ?
-    `Error ${actionVerb} playlist "${playlistId}" - ${err}` :
-    `Error ${actionVerb} playlists - ${err}`;
+    `Error ${actionVerb} playlist "${playlistId}" - ${error}` :
+    `Error ${actionVerb} playlists - ${error}`;
   handleError(res, httpStatusCode, errorType, message);
   log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
-  dbInit();
+  initDb();
 };
 
 module.exports = {
   setConfigForDb,
-  dbInit,
+  initDb,
   pingDb,
   initialDataLoad,
   getDb: () => db,

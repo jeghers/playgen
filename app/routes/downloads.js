@@ -1,19 +1,13 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const httpStatus = require('http-status-codes');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 const _ = require('lodash');
 
 const config = require('../config');
-const { getDb, getPlaylist, handleDbError } = require('../db');
-const {
-  relativeToAbsolutePath,
-  makeSymLink,
-  symLinkPath,
-  getAllSymLinks,
-} = require('../downloads');
-const { handleError, log } = require('../utils');
+
 const {
   OK,
   ERROR_NOENT,
@@ -25,8 +19,16 @@ const {
   LOG_LEVEL_ERROR,
   UNAVAILABLE,
 } = require('../constants');
-const fs = require('fs');
+const { getDb, getPlaylist, handleDbError } = require('../db');
+const {
+  relativeToAbsolutePath,
+  makeSymLink,
+  symLinkPath,
+  getAllSymLinks,
+} = require('../downloads');
+const { handleError, log } = require('../utils');
 
+const { routeNotFoundHandler, routeErrorHandler } = require('./utils');
 const downloadsEnabled = config.downloads.enabled && !_.isUndefined(config.downloads.downloadsPath);
 
 // router.use(logger('combined')); // was 'dev'
@@ -274,15 +276,7 @@ router.options('/:download_index', (req, res /* , next */) => {
   res.end();
 });
 
-router.use((req, res) => {
-  res.status(httpStatus.NOT_FOUND).send('Sorry can\'t find that!');
-});
-
-router.use((error, req, res) => {
-  // can this be modularized?
-  log(LOG_LEVEL_ERROR, '/v1/playlists/:playlist_id/downloads had an error');
-  log(LOG_LEVEL_ERROR, error.stack);
-  res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something broke!');
-});
+router.use(routeNotFoundHandler);
+router.use(routeErrorHandler);
 
 module.exports = router;

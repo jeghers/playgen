@@ -22,6 +22,8 @@ module.exports = {
 
   NOOP: 'NOOP',
   ERROR: 'ERROR',
+  READY: 'READY',
+  OFFLINE: 'OFFLINE',
   NOTFOUND: 'NOTFOUND',
   NOCONTENT: 'NOCONTENT',
   CONFLICT: 'CONFLICT',
@@ -48,5 +50,4 @@ module.exports = {
     [LOG_LEVEL_DEBUG]: LOG_LEVEL_DEBUG_VALUE,
     [LOG_LEVEL_NONE]: LOG_LEVEL_NONE_VALUE,
   },
-  DEFAULT_LOG_FILE_NAME: 'playgen.log',
 };
