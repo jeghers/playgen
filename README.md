@@ -3,7 +3,7 @@
 
 This background data service generates automatically randomized playlists.
 I've been using it with Liquidsoap for several years now.
- 
+
 The playlist generator has the following features:
 
 * Completely randomized song selection unattended 24/7
@@ -19,6 +19,9 @@ The playlist generator has the following features:
 * Automatic songlist generation for a directory full of song files
 * New request feature allows a queue of specified song(s) to be
   unconditionally played next after the current song completes
+* New download links feature allows specified song(s) to be made
+  available as downloads via symbolic links deployed to the web 
+  server of your choice
 * Uses MySQL to store playlist options (the songs themselves are listed in
   text files)
 * Can be modified to fall back on JSON text file for playlist options in case
@@ -146,6 +149,9 @@ postponed again and again).
   directly add playlist rows to the table with SQL statements, or later (after
   starting the playlist generator service) you can use the `POST /api/vi/playlists`
   described in the "REST API Reference" below to create more entries.
+
+  * Note: to avoid internal parsing errors, playlist names must not include any
+  dash "-" characters.
 
 * Use `npm run start` to run the playlist generator service
 
@@ -350,7 +356,9 @@ describing that playlist.  The following columns are required in each row:
 * `name`: the id for the playlist
 
 * `filePath`: the absolute path to a text file naming all the songs in the
-  playlist, sample files are in the `playlists` directory
+  playlist, there are sample files in the `playlists` directory.  Alternately,
+  `filePath` can point to a directory full of song files, and all those files
+  will be added to this playlist.
 
 * `description`: a human-readable description of the playlist
 
@@ -448,7 +456,8 @@ This plugin architecture will support the following things:
     * _mp3tags_: reads MP3 tags; this might slow startups considerably
 
 The provided plugins can serve as a starting point for creating new
-plugins.  You can copy one of those and modify it to suit your needs.
+plugins, as well as examples to learn from.  You can copy one of those
+and modify it to suit your needs.
 
 Each different kind of plugin will have a different interface; that is, a
 different set of well-defined functions that must be implemented.  But all
@@ -480,7 +489,7 @@ Once you have written a new plugin, you can register it with the following steps
   * All plugins must implement `initPlugin`, which is common to all plugins.
     If you have nothing to initialize, just provide an empty function.
   * Be sure to export all the plugin methods, and also a `name` property.
-    This is important to the proper initialization of the plugin.  It should
+    This is important for the proper initialization of the plugin.  It should
     look like this example:
 ```
         module.exports = {
@@ -506,9 +515,10 @@ Once you have written a new plugin, you can register it with the following steps
     ];
 ```
 
-* Under `config.plugins.logging` or `config.plugins.songDetails` (depending on your
-  type of plugin) there is an array of plugin definitions.  Add an entry for your
-  new plugin to this array.  For example, it might look like this:
+* Add your plugin details to the config file(s).  Under `config.plugins.logging`
+  or `config.plugins.songDetails` (depending on your type of plugin) there is an
+  array of plugin definitions.  Add an entry for your new plugin to this array.
+  For example, it might look like this:
 ```
       {
         name: 'myNewPlugin', // what you'll name the plugin
@@ -585,6 +595,53 @@ Each playlist can have a different song details plugin activated by entering
 the plugin name in the `songDetailsPluginName` column of that playlist row
 in the `playlists` table in the MySQL database.  If that value is left `NULL`
 in the database, then the default plugin will be used.
+
+### **Configuring download links**
+
+Optionally, "playgen" can make song files available to a web server for
+downloading.  Using API calls, you can specify individual songs in a given
+playlist, and symbolic links are deployed to the configured directory of
+your choice (presumably a directory within your web server).  In this way,
+the song files referenced by the deployed links are downloadable.
+
+Optionally, you can configure an expiration time.  This means that the
+download links will be deleted after the expiration time of your choice.
+A repeating service task runs within "playgen" to periodically scan all
+the download links, identify which ones are aged older then the expiration
+time, and then delete them.
+
+If you do not configure an expiration time, then the download links will
+remain indefinitely until you delete them.
+
+Here is an example of the downloads section of a "playgen" configuration:
+```
+  downloads: {
+    enabled: true,
+    downloadsPath: './downloads',
+    scanIntervalMinutes: 15,
+    // all expire times add up cumulatively
+    expireTimeMinutes: 10,
+    expireTimeHours: 16,
+    // expireTimeDays: 7,
+  },
+```
+To enable this download links feature, the `enabled` parameter must exist
+and be set to true.  `downloadsPath` must also be provided, it can be either
+an absolute or relative path (relative to the "playgen" home directory).
+`IMPORTANT`: be sure the directory given by `downloadsPath` has write permission
+settings such that playgen can create symbolic links there.
+
+To set the expiration time, you can specify a combination of minutes, hours
+and days.  They will be added together cumulatively to determine the total
+expiration time.  It is okay to omit any of the three values you don't want
+to use.  If you specify none, or the expiration time is zero, then no
+expiration deletions will be done.
+
+The scan interval is specified in minutes.  If an interval is unspecified,
+then a default value of 5 minutes will be used.  If you specify a scan interval
+of 2 minutes or less, then there will be no scans and no expiration deletions.
+This is to avoid excessive churning of file system activity.
+
 
 ## **Liquidsoap Usage**
 
@@ -687,7 +744,6 @@ _Sample response headers_
 
 _Sample request body_
 ```
-Sample request body
 {
   "name": "sample",
   "filePath": "/usr/local/nodeapps/playgen/playlists/sample-playlist.txt",
@@ -1236,4 +1292,240 @@ for the specified playlist
 _Sample response headers_
 ```
 "Allow": "GET"
+```
+
+### Song download links for a playlist
+
+#### GET http://somehost:3000/api/v1/downloads
+
+* Returns the list of all the songs available for download for all playlists.  The downloads list is derived from scanning all the symbolic links to song files in the configured download directory.
+
+_Sample response body_
+```
+{
+    "status": "OK",
+    "result": {
+        "playlists": [
+            {
+                "playlist": "somePlayList",
+                "downloadLinks": [
+                    {
+                        "songIndex": 3,
+                        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList-3-My_Bird_Won't_Sing.mp3",
+                        "songPath": "D:\\src\\playgen\\playlists\\some-play-list\\My Bird Won't Sing (snippet)-Ticket To Chicago-Dave Hole-Allligator Records-1997.mp3",
+                        "downloadIndex": 0
+                    },
+                    {
+                        "songIndex": 4,
+                        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList-4-Rats_'N'_Roaches.mp3",
+                        "songPath": "D:\\src\\playgen\\playlists\\some-play-list\\Rats 'N' Roaches (snippet)-Mark Jeghers-The Bluez Projekt-T4P Music-2005.mp3",
+                        "downloadIndex": 1
+                    },
+                    {
+                        "songIndex": 6,
+                        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList-6-We_All_Gonna_Face_the_Rising_Sun.mp3",
+                        "songPath": "D:\\src\\playgen\\playlists\\some-play-list\\We All Gonna Face the Rising Sun (snippet)-Delta Big Four-Complete Recordings 1929 to 1934 (1930 to 1934)-JSP Records-2002.mp3",
+                        "downloadIndex": 2
+                    }
+                ],
+                "downloadsCount": 3
+            },
+            {
+                "playlist": "anotherPlayList",
+                "downloadLinks": [
+                    {
+                        "songIndex": 4,
+                        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList2-4-Exploration_-_Purple_Motion.mp3",
+                        "songPath": "D:\\src\\playgen\\playlists\\another-play-list\\Exploration (snippet)-Purple Motion-Mod Snippets-Unlabeled-1992.mp3",
+                        "downloadIndex": 0
+                    },
+                    {
+                        "songIndex": 7,
+                        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList2-7-The_Evening_Blues_-_Cyberius_Ariadne.mp3",
+                        "songPath": "D:\\src\\playgen\\playlists\\another-play-list\\The Evening Blues (snippet)-Cyberius Ariadne-Mod Snippets-Unlabeled-1999.mp3",
+                        "downloadIndex": 1
+                    }
+                ],
+                "downloadsCount": 2
+            }
+        ],
+        "playlistCount": 2,
+        "downloadLinksTotalCount": 5
+    }
+}
+```
+
+#### HEAD http://somehost:3000/api/v1/downloads
+
+* Returns metadata for all the songs available for download for all playlists
+
+_Sample response headers_
+```
+"X-Playlist-Count": "2"
+"X-DownloadLinks-Total-Count": "5"
+"Content-Type": "application/json; charset=utf-8"
+"Content-Length": "1514"
+```
+
+#### OPTIONS http://somehost:3000/api/v1/downloads
+
+* Returns the supported command verbs for all the songs available for download for all playlists
+
+_Sample response headers_
+```
+"Allow": "GET,HEAD"
+```
+
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/downloads
+
+* Returns the list of all the songs available for download for the specified playlist.
+  The downloads list remembers all songs selected or requested for this playlist
+  since the "playgen" service started running, up to a maximum limit coded in the
+  config source files.
+
+_Sample response body_
+```
+{
+  "status": "OK",
+  "result": {
+    "playlist": "crimson",
+    "downloads": [
+      {
+        "index": 107,
+        "song": {
+          "file": "/usr2/Blues/mp3-96kbps/Nothin' But The Blood-Salinas-2013-Crimson Blues-Unpublished-T4P-2013.mp3",
+          "index": 107,
+          "title": "Nothin' But The Blood",
+          "artist": "Salinas",
+          "album": "2013",
+          "label": "Crimson Blues",
+          "year": "Unpublished",
+          "uri": "http://192.168.0.248:3000/api/v1/playlists/crimson/songs/107"
+        },
+        "timestamp": 1622795620170,
+        "downloadsIndex": 0,
+        "uri": "http://192.168.0.248:3000/api/v1/playlists/crimson/downloads/0"
+      },
+      ... etc etc etc ...
+      {
+        "index": 168,
+        "song": {
+          "file": "/usr2/Blues/mp3-96kbps/The Hand Of God-Crimson Blues-KSAR 15 TV Studio-T4P Music-2014.mp3",
+          "index": 168,
+          "title": "The Hand Of God",
+          "artist": "Crimson Blues",
+          "album": "KSAR 15 TV Studio",
+          "label": "T4P Music",
+          "year": "2014",
+          "uri": "http://192.168.0.248:3000/api/v1/playlists/crimson/songs/168"
+        },
+        "timestamp": 1622634924268,
+        "downloadsIndex": 499,
+        "uri": "http://192.168.0.248:3000/api/v1/playlists/crimson/downloads/499"
+      }
+    ],
+    "count": 500
+  }
+}
+```
+
+#### HEAD http://somehost:3000/api/v1/playlists/{playlist}/downloads
+
+* Returns metadata for the downloads of all the songs selected for the
+  specified playlist
+
+_Sample response headers_
+```
+"X-Count": "500"
+"X-Total-Count": "500"
+"Content-Type": "application/json; charset=utf-8"
+"Content-Length": "217640"
+```
+
+#### POST http://somehost:3000/api/v1/playlists/{playlist}/downloads
+
+* Creates a new downloadable link to a specified song in a specified playlist
+
+_Sample request body_
+```
+{
+    "songIndex": 3
+}
+```
+_Sample response body_
+```
+{
+    "status": "OK",
+    "result": {
+        "playlist": "somePlayList",
+        "songToDownload": {
+            "title": "My Bird Won't Sing",
+            "detailsLoaded": true,
+            "index": 3,
+            "file": "D:\\src\\playgen\\playlists\\some-play-list\\My Bird Won't Sing (snippet)-Ticket To Chicago-Dave Hole-Allligator Records-1997.mp3",
+            "artist": "Ticket To Chicago",
+            "album": "Dave Hole",
+            "year": "1997"
+        },
+        "symLinkPath": "D:\\src\\playgen\\downloads\\song-somePlayList-3-My_Bird_Won't_Sing.mp3"
+    }
+}
+```
+
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/downloads
+
+* Returns the supported command verbs for the downloads list for the specified
+  playlist
+
+_Sample response headers_
+```
+"Allow": "GET,HEAD"
+```
+
+#### GET http://somehost:3000/api/v1/playlists/{playlist}/downloads/{songIndex}
+
+* Returns the specified download link for the specified playlist
+
+_Sample response body_
+```
+{
+    "status": "OK",
+    "result": {
+        "playlist": "somePlayList",
+        "downloadIndex": 1,
+        "linkPath": "D:\\src\\playgen\\downloads\\song-somePlayList-4-Rats_'N'_Roaches.mp3",
+        "song": {
+            "title": "Rats 'N' Roaches",
+            "detailsLoaded": true,
+            "index": 4,
+            "file": "D:\\src\\playgen\\playlists\\some-play-list\\Rats 'N' Roaches (snippet)-Mark Jeghers-The Bluez Projekt-T4P Music-2005.mp3",
+            "artist": "Mark Jeghers",
+            "album": "The Bluez Projekt",
+            "label": "T4P Music",
+            "year": "2005"
+        }
+    }
+}
+```
+
+#### OPTIONS http://somehost:3000/api/v1/playlists/{playlist}/downloads/{songIndex}
+
+* Returns the supported command verbs for the specified song in the downloads list
+  for the specified playlist
+
+_Sample response headers_
+```
+"Allow": "GET,HEAD,DELETE"
+```
+
+#### DELETE http://somehost:3000/api/v1/playlists/{playlist}/downloads/{songIndex}
+
+* Deletes the specified download link for the specified playlist
+
+_Sample response headers_
+```
+{
+    "status": "OK",
+    "message": "Download link \"D:\\src\\playgen\\downloads\\song-somePlayList-4-Rats_'N'_Roaches.mp3\" deleted"
+}
 ```

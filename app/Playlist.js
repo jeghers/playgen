@@ -3,10 +3,13 @@
  */
 
 const fs = require('fs');
+// const path = require('path');
 const _ = require('lodash');
 
+const filePathDelimiter = process.platform === 'win32' ? '\\' : '/';
+
 const { getPlugin, getDefaultPlugin } = require('./plugins/pluginUtils');
-const { log, extract } = require('./utils');
+const { log, extractSongInfo } = require('./utils');
 const {
   PLUGIN_TYPE_SONG_DETAILS,
   LOG_LEVEL_DEBUG,
@@ -96,7 +99,7 @@ class Playlist {
               log(LOG_LEVEL_DEBUG, `[${thisPlaylist.name}] Files in directory ${thisPlaylist.filePath}...`);
               log(LOG_LEVEL_DEBUG, files);
               files.forEach((file, index) => {
-                thisPlaylist._processLine(`${thisPlaylist.filePath}/${file}`, index);
+                thisPlaylist._processLine(`${thisPlaylist.filePath}${filePathDelimiter}${file}`, index);
               });
               thisPlaylist._songCount =
                 (thisPlaylist._songsToPlay) ? thisPlaylist._songsToPlay.length : 0;
@@ -107,8 +110,8 @@ class Playlist {
               log(LOG_LEVEL_INFO, `Playlist "${thisPlaylist.name}" song count is ${thisPlaylist._songCount}`);
               resolve(thisPlaylist);
             }
-            catch (err) {
-              reject(err);
+            catch (error) {
+              reject(error);
             }
           });
         }
@@ -118,7 +121,7 @@ class Playlist {
           thisPlaylist._readLines(fileInput, resolve, reject);
         });
       }
-      catch (err) {
+      catch (error) {
         log(LOG_LEVEL_ERROR, `Playlist "${thisPlaylist.name}" song file ${thisPlaylist.filePath} DOES NOT exist or is not readable`);
         return null;
       }
@@ -161,7 +164,7 @@ class Playlist {
       }
     });
 
-    fileInput.on('error', (err) => {
+    fileInput.on('error', (error) => {
       thisPlaylist._fileLoaded = false;
       thisPlaylist._songsToPlay = null;
       thisPlaylist._songCount = 0;
@@ -172,8 +175,8 @@ class Playlist {
       thisPlaylist._songHistory = [];
       thisPlaylist._titleHistory = [];
       thisPlaylist._artistHistory = [];
-      log(LOG_LEVEL_ERROR, `[${thisPlaylist.name}] Failed to load ${thisPlaylist._filePath} - ${err}`);
-      reject(err);
+      log(LOG_LEVEL_ERROR, `[${thisPlaylist.name}] Failed to load ${thisPlaylist._filePath} - ${error}`);
+      reject(error);
     });
   }
 
@@ -181,7 +184,7 @@ class Playlist {
     const songFilePath = line.replace(/\r/, '');
     log(LOG_LEVEL_DEBUG, `[${this.name}] Song file: ${songFilePath}`);
     if (!this._songsToPlay) { this._songsToPlay = []; }
-    const o = extract(songFilePath, this.songDetailsPlugin);
+    const o = extractSongInfo(songFilePath, this.songDetailsPlugin);
     o.index = lineIndex;
     o.file = songFilePath;
     this._songsToPlay.push(o);

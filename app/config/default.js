@@ -16,6 +16,17 @@ module.exports = {
     songHistoryLimit: 500,
     duplicateReplacementRetries: 10,
   },
+  downloads: {
+    enabled: true,
+    downloadsPath: './downloads',
+    webServerBaseUrl: 'https://www.t4p.com/blues/icecastDownloads',
+    scanIntervalMinutes: 5,
+    // all expire times add up cumulatively
+    // expireTimeMinutes: 1,
+    // expireTimeMinutes: 25,
+    // expireTimeHours: 0,
+    // expireTimeDays: 7,
+  },
   // TODO: move plugins to their own separate merge-friendly space
   plugins: {
     logging: [
