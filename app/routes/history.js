@@ -5,8 +5,6 @@ const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 const _ = require('lodash');
 
-const { getDb, getPlaylist, handleDbError } = require('../db');
-const { handleError, log } = require('../utils');
 const {
   GET,
   OK,
@@ -14,8 +12,11 @@ const {
   NOCONTENT,
   LOG_LEVEL_DEBUG,
   LOG_LEVEL_INFO,
-  LOG_LEVEL_ERROR,
 } = require('../constants');
+const { getDb, getPlaylist, handleDbError } = require('../db');
+const { handleError, log } = require('../utils');
+
+const { routeNotFoundHandler, routeErrorHandler } = require('./utils');
 
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
@@ -163,15 +164,7 @@ router.options('/:playlist_id', (req, res /* , next */) => {
   res.end();
 });
 
-router.use((req, res) => {
-  res.status(httpStatus.NOT_FOUND).send('Sorry can\'t find that!');
-});
-
-router.use((error, req, res) => {
-  // can this be modularized?
-  log(LOG_LEVEL_ERROR, '/v1/playlists/:playlist_id/history had an error');
-  log(LOG_LEVEL_ERROR, error.stack);
-  res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something broke!');
-});
+router.use(routeNotFoundHandler);
+router.use(routeErrorHandler);
 
 module.exports = router;
