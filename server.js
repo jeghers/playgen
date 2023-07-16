@@ -49,7 +49,6 @@ initVault().then(initedOk => {
       .then(token => {
         setVaultAppRoleToken(token);
         log(LOG_LEVEL_INFO, 'authenticateVaultAppRole finished ok');
-        log(LOG_LEVEL_INFO, `App Role token is ${token}`);
         log(LOG_LEVEL_DEBUG, 'call updateConfigFromVault now...');
         updateConfigFromVault(config)
           .then(() => {

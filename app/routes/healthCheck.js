@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const { GET, READY, OFFLINE, LOG_LEVEL_DEBUG } = require('../constants');
 const { pingDb } = require('../db');
 const { log } = require('../utils');
+
 const { routeErrorHandler, routeNotFoundHandler } = require('./utils');
 
 // router.use(logger('combined')); // was 'dev'

@@ -19,6 +19,7 @@ module.exports = {
   ERROR_EXIST: 'EEXIST',
   DOWNLOAD_LINK_PREFIX: 'song-',
   DEFAULT_LOG_FILE_NAME: 'playgen.log',
+  VAULT_TRUSTED_HELPER_TIMEOUT: 5000,
 
   NOOP: 'NOOP',
   ERROR: 'ERROR',

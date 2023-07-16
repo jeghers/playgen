@@ -18,6 +18,7 @@ const { getDb, getPlaylist, handleDbError } = require('../db');
 const { handleError, log } = require('../utils');
 
 const { routeErrorHandler, routeNotFoundHandler } = require('./utils');
+
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));

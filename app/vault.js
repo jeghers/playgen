@@ -3,7 +3,7 @@ const http = require('http');
 const httpStatus = require('http-status-codes');
 const _ = require('lodash');
 
-const { LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_DEBUG } = require('./constants');
+const { LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_DEBUG, VAULT_TRUSTED_HELPER_TIMEOUT } = require('./constants');
 const { log } = require('./utils');
 
 const vaultSettings = require('./config/vaultSettings');
@@ -13,7 +13,7 @@ const vaultOptions = {
   endpoint: process.env.VAULT_ADDR,
 };
 
-const vaultClientPrefix = process.env.VAULT_CLIENT;
+const vaultClientTypePrefix = process.env.VAULT_CLIENT_TYPE;
 
 let vaultClient = _.isEmpty(vaultOptions.endpoint) ? null : vault(vaultOptions);
 
@@ -42,37 +42,56 @@ const setVaultAppRoleToken = appRoleToken => {
 
 const getVaultStatus = async () => {
   if (_.isEmpty(vaultOptions.endpoint) || _.isNull(vaultOptions.token)) {
-    return { initialized: false, sealed: null, authenticated: false, error: 'No Vault service available' };
+    return {
+      initialized: false,
+      sealed: null,
+      appRole: vaultClientAppRole,
+      authenticated: false,
+      error: 'No Vault service available',
+    };
   }
   try {
     const status = await vaultClient.status();
     const { initialized, sealed } = status;
-    return { initialized, sealed, authenticated: !_.isUndefined(vaultOptions.token) };
+    return {
+      initialized,
+      sealed,
+      appRole: vaultClientAppRole,
+      authenticated: !_.isUndefined(vaultOptions.token),
+    };
   } catch (error) {
     log(LOG_LEVEL_ERROR, `Failed to connect to vault: ${error.message}`);
     /* eslint-disable no-undefined */
-    return { initialized: false, sealed: null, authenticated: false, error: error.message };
+    return {
+      initialized: false,
+      sealed: null,
+      appRole: vaultClientAppRole,
+      authenticated: false,
+      error: error.message,
+    };
   }
 };
 
 const vaultClientAppRole = process.env.VAULT_APP_ROLE;
 
 const vthOptions = {
+  // TODO: get VTH addr dynamically
   host: 'localhost',
   port: '9999',
   path: `/api/v1/appRoles/${vaultClientAppRole}`,
-  timeout: 5000,
+  timeout: VAULT_TRUSTED_HELPER_TIMEOUT,
 };
 
 const authenticateVaultAppRole = () => {
+  log(LOG_LEVEL_INFO, `Attempting to authenticate Vault app-role ${vaultClientAppRole}`);
   return new Promise((resolve, reject) => {
     const request = http.request(vthOptions, res => {
-      log(LOG_LEVEL_INFO, `APP-ROLE AUTH STATUS: ${res.statusCode}`);
+      log(LOG_LEVEL_INFO, `App-role authentication status: ${res.statusCode}`);
       if (res.statusCode === httpStatus.OK) {
         res.on('data', data => {
           const json = JSON.parse(data);
-          log(LOG_LEVEL_INFO, 'APP-ROLE AUTH DATA');
-          log(LOG_LEVEL_INFO, json);
+          log(LOG_LEVEL_DEBUG, 'App-role authentication data...');
+          log(LOG_LEVEL_DEBUG, json);
           resolve(json.token);
         });
       } else {
@@ -101,8 +120,8 @@ const buildVaultPaths = (vaultPaths, vaultPathToConfigFieldMap) => {
     const vaultSettingParts = vaultSetting.split(':');
     if (vaultSettingParts.length === 2) {
       let vaultPath = vaultSettingParts[0];
-      if (vaultClientPrefix) {
-        vaultPath = vaultPath.replace('%VAULT_CLIENT%', vaultClientPrefix);
+      if (vaultClientTypePrefix) {
+        vaultPath = vaultPath.replace('%VAULT_CLIENT%', vaultClientTypePrefix);
       } else {
         vaultPath = vaultPath.replace('%VAULT_CLIENT%', '').replace('//', '/');
       }

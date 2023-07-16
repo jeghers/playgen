@@ -20,6 +20,7 @@ const { handleError, watchLoadFilePromise, log } = require('../utils');
 const { Playlist } = require('../Playlist');
 
 const { routeNotFoundHandler, routeErrorHandler } = require('./utils');
+
 // router.use(logger('combined')); // was 'dev'
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));

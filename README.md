@@ -642,7 +642,6 @@ then a default value of 5 minutes will be used.  If you specify a scan interval
 of 2 minutes or less, then there will be no scans and no expiration deletions.
 This is to avoid excessive churning of file system activity.
 
-
 ## **Liquidsoap Usage**
 
 The "playgen" playlist generator service can be used with pretty much any

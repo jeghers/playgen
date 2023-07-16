@@ -29,6 +29,7 @@ const {
 const { handleError, log } = require('../utils');
 
 const { routeNotFoundHandler, routeErrorHandler } = require('./utils');
+
 const downloadsEnabled = config.downloads.enabled && !_.isUndefined(config.downloads.downloadsPath);
 
 // router.use(logger('combined')); // was 'dev'
