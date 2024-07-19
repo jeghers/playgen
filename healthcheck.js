@@ -1,4 +1,5 @@
 const http = require('http');
+const httpStatus = require('http-status-codes');
 
 const options = {
     host: 'localhost',
@@ -9,7 +10,7 @@ const options = {
 
 const request = http.request(options, res => {
     console.log(`STATUS: ${res.statusCode}`);
-    if (res.statusCode === 200) {
+    if (res.statusCode === httpStatus.OK) {
         process.exit(0);
     } else {
         process.exit(1);
