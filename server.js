@@ -1,12 +1,13 @@
 // server.js
 
+const { loadEnvFile } = require('node:process');
 const express = require('express');
 const bodyParser = require('body-parser');
 const httpStatus = require('http-status-codes');
 
 const config = require('./app/config');
 const { serverVersion, apiVersion } = require('./app/version');
-const { initDb, setConfigForDb, pingDb } = require('./app/db');
+const { initDb, setConfigForDb, pingDb, closeDb } = require('./app/db');
 const { initVault, updateConfigFromVault, authenticateVaultAppRole, setVaultAppRoleToken } = require('./app/vault');
 const { startDownloadCleanupService } = require('./app/downloads');
 const { pluginImpls } = require('./app/plugins/pluginImpls');
@@ -25,6 +26,9 @@ const requestsRoute = require('./app/routes/requests');
 const historyRoute = require('./app/routes/history');
 const downloadsRoute = require('./app/routes/downloads');
 const downloadsGlobalRoute = require('./app/routes/downloadsGlobal');
+
+loadEnvFile('./.env'); // Loads variables from the specified path
+console.log(`HOST_IP = ${process.env.HOST_IP}`);
 
 const port = process.env.PORT || config.session.port; // set our port
 
@@ -136,7 +140,28 @@ const initAndStartApp = () => {
 
   startDownloadCleanupService();
 
+  const gracefulShutdown = () => {
+    log(LOG_LEVEL_INFO, 'Shutting down server...');
+    closeDb((isError, message) => {
+      log(LOG_LEVEL_INFO, message);
+      log(LOG_LEVEL_INFO, 'DB connection closed');
+      log(LOG_LEVEL_INFO, 'Server stopped, exiting process');
+      // eslint-disable-next-line no-process-exit
+      process.exit(0);
+    });
+    // Force close the server after 5 seconds
+    setTimeout(() => {
+      log(LOG_LEVEL_INFO, 'Could not close DB connections, forcefully shutting down');
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
+    }, 5000);
+  };
+
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+
   // start the server
-  app.listen(port);
-  log(LOG_LEVEL_INFO, `Listening on port ${port}`);
+  app.listen(String(port), () => {
+    log(LOG_LEVEL_INFO, `Listening on port ${port}`);
+  });
 }

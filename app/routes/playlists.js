@@ -89,6 +89,7 @@ router.post('/', (req, res /* , next */) => {
   const insertParams = { name: req.body.name };
   const name = req.body.name;
   data.name = name;
+// TODO: verify filePath exists
   if (req.body.filePath) {
     insertParams.filePath = req.body.filePath;
     data.filePath = req.body.filePath;
@@ -210,6 +211,7 @@ router.put('/:playlist_id', (req, res /* , next */) => {
   const updateParams = [];
   let allValidFields = true;
   let fileChanged = false;
+  // TODO: verify filePath exists
   if (req.body.filePath) {
     updateQuery += 'filePath = ?';
     updateParams.push(req.body.filePath);
@@ -309,6 +311,7 @@ router.patch('/:playlist_id', (req, res /* , next */) => {
     updateParams.push(req.body.filePath);
     playlistDataCopy.filePath = req.body.filePath;
     log(LOG_LEVEL_DEBUG, `filePath = ${req.body.filePath}`);
+    // TODO: verify file exists
     if (playlistData.filePath !== req.body.filePath) {
       fileChanged = true;
     }

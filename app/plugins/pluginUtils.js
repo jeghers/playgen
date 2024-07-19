@@ -53,9 +53,20 @@ const getPlugin = (type, name) => {
   return null;
 }
 
+const getPlugins = (type, names) => {
+  const pluginsOfType = globalConfig.plugins[type];
+  if (pluginsOfType) {
+    return _.filter(pluginsOfType, (plugin) => {
+      return _.includes(names, plugin.name);
+    });
+  }
+  return null;
+}
+
 module.exports = {
   setPluginImpls,
   initAllPlugins,
   getDefaultPlugin,
   getPlugin,
+  getPlugins,
 };

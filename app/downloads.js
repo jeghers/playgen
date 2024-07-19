@@ -11,6 +11,7 @@ const {
 } = require('./constants');
 const { log } = require('./utils');
 const config = require('./config');
+const { getPlaylist } = require('./db');
 
 const filePathDelimiter = process.platform === 'win32' ? '\\' : '/';
 
@@ -40,6 +41,7 @@ const relativeToAbsolutePath = path => {
   return finalPath;
 };
 
+// not used yet
 const constructLinkPath = (playlistName, index, title) => {
   return `${config.downloads.downloadsPath}/${DOWNLOAD_LINK_PREFIX}${playlistName}-${index}-${title.replace(/ /g, '_')}.mp3`;
 };
@@ -52,54 +54,69 @@ const parseLinkPath = linkPath => {
   const path = pathAndFields[0];
   const fileFields = pathAndFields[1];
   const fields = fileFields.split('-');
-  const playlist = fields[0];
+  const playlistName = fields[0];
   const index = parseInt(fields[1], 10);
   const title = fields[2].replace(/_/g, ' ').replace('.mp3', '');
-  return { path, playlist, index, title };
+  return { path, playlistName, index, title };
 };
 
-const getAllSymLinks = (downloadsPath, playlist) => {
+const getAllSymLinks = (downloadsPath, playlistName) => {
   const absDownloadsPath = relativeToAbsolutePath(downloadsPath);
-  let symLinks = fs.readdirSync(absDownloadsPath);
-  log(LOG_LEVEL_DEBUG, 'Symbolic link files...');
-  log(LOG_LEVEL_DEBUG, symLinks);
-  if (!_.isUndefined(playlist)) {
-    symLinks = _.filter(symLinks, link => {
-      return link.startsWith(`song-${playlist}-`);
+  try {
+    let symLinks = fs.readdirSync(absDownloadsPath);
+    log(LOG_LEVEL_DEBUG, 'Symbolic link files...');
+    log(LOG_LEVEL_DEBUG, symLinks);
+    if (!_.isUndefined(playlistName)) {
+      symLinks = _.filter(symLinks, link => {
+        return link.startsWith(`song-${playlistName}-`);
+      });
+    }
+    const playlistLinkMap = {};
+    const playlistNameList = _.filter(_.uniq(_.map(symLinks, link => {
+      const linkInfo = parseLinkPath(link);
+      if (linkInfo === null) {
+        return null;
+      }
+      if (_.isUndefined(playlistLinkMap[linkInfo.playlistName])) {
+        playlistLinkMap[linkInfo.playlistName] = [];
+      }
+      const { index } = linkInfo;
+      const linkPath = `${absDownloadsPath}${filePathDelimiter}${link}`;
+      const url = `${config.downloads.webServerBaseUrl}/${link}`;
+      playlistLinkMap[linkInfo.playlistName].push({
+        songIndex: index,
+        linkPath,
+        url,
+        songPath: symLinkPath(linkPath),
+      });
+      return linkInfo.playlistName;
+    })), link => link !== null);
+    return _.map(playlistNameList, playlistNameListItem => {
+      const linkList = playlistLinkMap[playlistNameListItem].sort((link1, link2) => {
+        if (link1.songIndex < link2.songIndex) {
+          return -1;
+        } else if (link1.songIndex > link2.songIndex) {
+          return 1;
+        }
+        return 0;
+      });
+      const playlist = getPlaylist(playlistNameListItem);
+      _.forEach(linkList, (link, index) => {
+        const song = playlist._songsToPlay[link.songIndex];
+        link.title = song.title;
+        link.artist = song.artist;
+        link.downloadIndex = index;
+      });
+      return {
+        playlistName: playlistNameListItem,
+        downloadLinks: linkList,
+        downloadsCount: linkList.length,
+      };
     });
   }
-  const playlistLinkMap = {};
-  const playlistNames = _.filter(_.uniq(_.map(symLinks, link => {
-    const linkInfo = parseLinkPath(link);
-    if (linkInfo === null) {
-      return null;
-    }
-    if (_.isUndefined(playlistLinkMap[linkInfo.playlist])) {
-      playlistLinkMap[linkInfo.playlist] = [];
-    }
-    const { index } = linkInfo;
-    const linkPath = `${absDownloadsPath}${filePathDelimiter}${link}`;
-    const url = `${config.downloads.webServerBaseUrl}/${link}`;
-    playlistLinkMap[linkInfo.playlist].push({
-      songIndex: index,
-      linkPath,
-      url,
-      songPath: symLinkPath(linkPath),
-    });
-    return linkInfo.playlist;
-  })), link => link !== null);
-  return _.map(playlistNames, playlistName => {
-    const linkList = playlistLinkMap[playlistName].sort((link1, link2) => {
-      if (link1.songIndex < link2.songIndex) {
-        return -1;
-      } else if (link1.songIndex > link2.songIndex) {
-        return 1;
-      }
-      return 0;
-    });
-    _.forEach(linkList, (link, index) => { link.downloadIndex = index; });
-    return { playlistName, downloadLinks: linkList, downloadsCount: linkList.length };
-  });
+  catch (e) {
+    return [];
+  }
 };
 
 const makeSymLink = (target, link) => {

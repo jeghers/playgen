@@ -9,7 +9,7 @@ const { log } = require('./utils');
 const vaultSettings = require('./config/vaultSettings');
 
 const vaultOptions = {
-  apiVersion: 'v1',
+  apiVersion: 'v1', // not yet used?
   endpoint: process.env.VAULT_ADDR,
 };
 
@@ -76,7 +76,7 @@ const vaultClientAppRole = process.env.VAULT_APP_ROLE;
 
 const vthOptions = {
   // TODO: get VTH addr dynamically
-  host: 'localhost',
+  host: process.env.VAULT_HOST_IP,
   port: '9999',
   path: `/api/v1/appRoles/${vaultClientAppRole}`,
   timeout: VAULT_TRUSTED_HELPER_TIMEOUT,

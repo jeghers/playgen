@@ -2,7 +2,7 @@
 const rsyslog = require('node-rsyslog');
 
 const options = {
-  host: '192.168.0.245',
+  host: '192.168.0.246',
   appname: 'playgen',
   method: 'TCP',
 };

@@ -1,16 +1,15 @@
 
-/* eslint-disable no-warning-comments */
 module.exports = {
   session: {
     port: 3000,
     secure: false, // use this later?
   },
   db: {
-    host: 'localhost',
+    host: process.env.HOST_IP,
     user: 'root',
     port: 3306,
-    password: 'your_db_password',
-    database: 'your_db_schema',
+    password: 'yrut9bUh', // 'your_db_password',
+    database: 'BluesWire', // 'your_db_schema',
     reconnectTime: 1000,
   },
   playlists: {
@@ -46,7 +45,7 @@ module.exports = {
         params: [
           {
             name: 'fileName',
-            value: 'd:\\src\\playgen\\playgen.log',
+            value: '/var/log/playgen/playgen.log',
           },
           {
             name: 'packJson',
@@ -65,8 +64,23 @@ module.exports = {
       },
     ],
   },
-  logType: 'console',
+  logType: [
+    'console',
+    'localFile'
+  ],
   logLevel: 'info',
   healthCheckRetryTime: 5000,
   isWindowsService: process.env.IS_WINDOWS_SERVICE === 'true',
 };
+
+/*
+update SQL
+ALTER TABLE `blueswire`.`playlists`
+ADD COLUMN `songDetailsPluginName` VARCHAR(32) NULL DEFAULT NULL AFTER `partialTitleDelimiters`,
+CHANGE COLUMN `redundantArtistThreshold` `redundantArtistThreshold` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `redundantTitleThreshold`;
+
+revert SQL
+ALTER TABLE `blueswire`.`playlists`
+DROP COLUMN `songDetailsPluginName`,
+CHANGE COLUMN `partialTitleDelimiters` `partialTitleDelimiters` VARCHAR(16) NULL DEFAULT NULL AFTER `redundantTitleThreshold`;
+ */

@@ -1,1 +1,1 @@
-docker run --name playgen -v /usr2/Blues:/usr2/Blues -v /usr2/MOD:/usr2/MOD -p 3000:3000 -d --restart always t4p/playgen
+docker run --name playgen -v /usr2/Blues:/usr2/Blues -v /usr2/MOD:/usr2/MOD -v /usr2/www/t4p.com/public_html/blues/icecastDownloads:/usr2/www/t4p.com/public_html/blues/icecastDownloads --volume /var/log/playgen/playgen.log:/var/log/playgen/playgen.log -p 3000:3000 -d --restart always t4p/playgen

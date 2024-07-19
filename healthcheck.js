@@ -1,14 +1,18 @@
+const { loadEnvFile } = require('node:process');
 const http = require('http');
 const httpStatus = require('http-status-codes');
 
+loadEnvFile('./.env');
+
 const options = {
-    host: 'localhost',
+    host: process.env.HOST_IP || 'localhost',
     port: '3000',
     path: '/api/v1/healthcheck',
     timeout: 5000,
 };
 
 const request = http.request(options, res => {
+    console.log(`HOST_IP: ${process.env.HOST_IP}`);
     console.log(`STATUS: ${res.statusCode}`);
     if (res.statusCode === httpStatus.OK) {
         process.exit(0);

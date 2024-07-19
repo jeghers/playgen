@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "A RESTful API service for managing playlists for streaming music servers like Icecast",
   "engines": {
-    "npm": ">=3",
-    "node": ">=6"
+    "npm": ">=10",
+    "node": ">=20"
   },
   "author": "Mark Jeghers",
   "vendor": "Technology for People",
@@ -76,7 +76,8 @@
     "mysql8": "^2.17.3",
     "node-rsyslog": "^0.9.1",
     "node-vault": "^0.9.22",
-    "node-windows": "^1.0.0-beta.6"
+    "node-windows": "^1.0.0-beta.6",
+    "systeminformation": "^5.22.11"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

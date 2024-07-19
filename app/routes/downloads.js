@@ -11,6 +11,7 @@ const config = require('../config');
 const {
   OK,
   ERROR_NOENT,
+  ERROR_EPERM,
   ERROR_EXIST,
   ERROR,
   NOTFOUND,
@@ -40,6 +41,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // create new download in a given playlist
 // (accessed at POST http://localhost:<port>/api/v1/playlists/:playlist_id/downloads)
 router.post('/', (req, res /* , next */) => {
+  console.warn('**** POST /api/v1/playlists/:playlist_id/downloads - ROUTE AAA');
   log(LOG_LEVEL_INFO, `/api/v1/playlists called with POST url = ${req.url}`);
   if (!downloadsEnabled) {
     handleError(res, httpStatus.SERVICE_UNAVAILABLE, UNAVAILABLE,
@@ -80,8 +82,8 @@ router.post('/', (req, res /* , next */) => {
             return;
           }
           const songPath = songToDownload.file;
-          const linkPath =
-            `${config.downloads.downloadsPath}/song-${playlist.name}-${songIndex}-${songToDownload.title.replace(/ /g, '_')}.mp3`;
+          const songFileName = `song-${playlist.name}-${songIndex}-${songToDownload.title.replace(/ /g, '_')}.mp3`;
+          const linkPath = `${config.downloads.downloadsPath}/${songFileName}`;
           const returnCode = makeSymLink(songPath, linkPath);
           const linkTargetPath = symLinkPath(linkPath);
           log(LOG_LEVEL_DEBUG, `linkTargetPath = ${linkTargetPath}`);
@@ -89,18 +91,22 @@ router.post('/', (req, res /* , next */) => {
           let httpStatusCode = httpStatus.CREATED;
           if (returnCode === ERROR_NOENT) {
             httpStatusCode = httpStatus.NO_CONTENT;
+          } else if (returnCode === ERROR_EPERM) {
+            httpStatusCode = httpStatus.FORBIDDEN;
           } else if (returnCode === ERROR_EXIST) {
             httpStatusCode = httpStatus.CONFLICT;
           }
           res.status(httpStatusCode);
           if (isOk) {
             const absLinkPath = relativeToAbsolutePath(linkPath);
+            const url = `${config.downloads.webServerBaseUrl}/${songFileName}`;
             res.json({
               status: returnCode,
               result: {
                 playlist: playlistId,
                 songToDownload,
                 symLinkPath: absLinkPath,
+                url,
               },
             });
             res.end();
@@ -201,22 +207,27 @@ router.get('/:download_index', (req, res /* , next */) => {
         const playlist = getPlaylist(rows[0].name);
         const downloadIndex = parseInt(req.params.download_index, 10);
         const downloadLinksByPlaylist = getAllSymLinks(config.downloads.downloadsPath, playlistId);
-        const { downloadLinks } = downloadLinksByPlaylist[0];
-        if (downloadIndex > downloadLinks.length) {
-          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
-            'Playlist "' + playlistId + '" only has ' + downloadLinks.length + ' download links');
-        }
-        const downloadLink = downloadLinks[downloadIndex];
-        const song = _.cloneDeep(playlist._songsToPlay[downloadLink.songIndex]);
-        res.json({
-          status: OK,
-          result: {
-            playlist: playlistId,
-            downloadIndex,
-            linkPath: downloadLink.linkPath,
-            song,
+        if (downloadLinksByPlaylist.length > 0) {
+          const { downloadLinks } = downloadLinksByPlaylist[0];
+          if (downloadIndex > downloadLinks.length) {
+            handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
+              'Playlist "' + playlistId + '" only has ' + downloadLinks.length + ' download links');
           }
-        });
+          const downloadLink = downloadLinks[downloadIndex];
+          const song = _.cloneDeep(playlist._songsToPlay[downloadLink.songIndex]);
+          res.json({
+            status: OK,
+            result: {
+              playlist: playlistId,
+              downloadIndex,
+              linkPath: downloadLink.linkPath,
+              song,
+            }
+          });
+        } else {
+          handleError(res, httpStatus.NOT_FOUND, NOTFOUND,
+            'Playlist "' + playlistId + '" only no download links');
+        }
       }
     }
   );
@@ -248,6 +259,12 @@ router.delete('/:download_index', (req, res /* , next */) => {
       } else {
         const downloadIndex = parseInt(req.params.download_index, 10);
         const downloadLinksByPlaylist = getAllSymLinks(config.downloads.downloadsPath, playlistId);
+        if (downloadLinksByPlaylist.length === 0 || _.isUndefined(downloadLinksByPlaylist[0])) {
+          log(LOG_LEVEL_ERROR, `Download link at index ${downloadIndex} does not exist`);
+          res.status(httpStatus.NOT_FOUND);
+          res.json({ status: NOTFOUND, message: 'Download link at index "' + downloadIndex + '" not found' });
+          return;
+        }
         const downloadLinkToDelete = downloadLinksByPlaylist[0].downloadLinks[downloadIndex].linkPath;
         if (!fs.existsSync(downloadLinkToDelete)) {
           log(LOG_LEVEL_ERROR, `Download link ${downloadLinkToDelete} does not exist`);

@@ -20,7 +20,6 @@ const openLogFile = fileName => {
   logFileStream = fs.createWriteStream(fileName, { flags: 'a', autoClose: true });
 };
 
-/* eslint-disable no-warning-comments */
 const initPlugin = (config, params) => {
   const fileNameParam = _.filter(params, { name: 'fileName' });
   logFileName = _.isEmpty(fileNameParam) ? DEFAULT_LOG_FILE_NAME : fileNameParam[0].value;

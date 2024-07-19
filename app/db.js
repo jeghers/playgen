@@ -36,7 +36,7 @@ const initDb = () => {
       log(LOG_LEVEL_ERROR, `Error connecting to DB - ${error}`);
       return;
     }
-    log(LOG_LEVEL_INFO, 'Connection established');
+    log(LOG_LEVEL_INFO, 'DB Connection established');
   });
   // If you're also serving http, display a 503 error.
   db.on('error', error => {
@@ -51,12 +51,6 @@ const initDb = () => {
   });
 
   initialDataLoad();
-
-  /* db.end((error) => {
-      // The connection is terminated gracefully
-      // Ensures all previously enqueued queries are still
-      // before sending a COM_QUIT packet to the MySQL server.
-  }); */
 };
 
 const initialDataLoad = () => {
@@ -77,8 +71,7 @@ const initialDataLoad = () => {
     log(LOG_LEVEL_NONE, 'Data received from DB:');
     log(LOG_LEVEL_NONE, rows);
 
-    /* eslint-disable no-warning-comments */
-    if (rows && rows.length) {
+     if (rows && rows.length) {
       for (let i = 0; i < rows.length; i++) {
         // TODO: try to rescue old history on re-connect of DB
         const playlist = initPlaylist(rows[i]);
@@ -140,11 +133,22 @@ const pingDb = resultCallback => {
   });
 };
 
+const closeDb = resultCallback => {
+  log(LOG_LEVEL_DEBUG, 'Closing the database...');
+  db.end(error => {
+    if (error) {
+      log(LOG_LEVEL_DEBUG, `Database threw error trying to close - ${error.toString()}`);
+    }
+    const resultMessage = error ? `Close DB failed with "${error.toString()}"` : 'Closed database ok';
+    resultCallback(_.isUndefined(error), resultMessage);
+  });
+};
+
 /* eslint-disable max-params */
 const handleDbError = (res, httpStatusCode, errorType, actionVerb, playlistId, error) => {
   const message = playlistId ?
-    `Error ${actionVerb} playlist "${playlistId}" - ${error}` :
-    `Error ${actionVerb} playlists - ${error}`;
+    `Error ${actionVerb} playlist "${playlistId}" - ${error.toString()}` :
+    `Error ${actionVerb} playlists - ${error.toString()}`;
   handleError(res, httpStatusCode, errorType, message);
   log(LOG_LEVEL_WARNING, 'Reconnecting to DB...');
   initDb();
@@ -159,5 +163,6 @@ module.exports = {
   getPlaylists: () => playlists,
   getPlaylist: name => playlists[name],
   setPlaylist: (name, playlist) => { playlists[name] = playlist; },
+  closeDb,
   handleDbError,
 };
