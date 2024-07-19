@@ -16,6 +16,7 @@ module.exports = {
   GET: 'GET',
   OK: 'OK',
   ERROR_NOENT: 'ENOENT',
+  ERROR_EPERM: 'EPERM',
   ERROR_EXIST: 'EEXIST',
   DOWNLOAD_LINK_PREFIX: 'song-',
   DEFAULT_LOG_FILE_NAME: 'playgen.log',

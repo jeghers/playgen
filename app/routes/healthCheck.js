@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const httpStatus = require('http-status-codes');
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
+const si = require('systeminformation');
 
 const { GET, READY, OFFLINE, LOG_LEVEL_DEBUG } = require('../constants');
 const { pingDb } = require('../db');
@@ -19,15 +20,18 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // (accessed at GET/HEAD http://localhost:<port>/api/v1/healthcheck)
 router.get('/', (req, res /* , next */) => {
   log(LOG_LEVEL_DEBUG, `/api/v1/healthcheck called with GET url = ${req.url}`);
-  pingDb((healthCheckFlag, reasonText) => {
-    if (healthCheckFlag) {
-      res.status(httpStatus.OK);
-      res.json({ status: READY, reason: reasonText });
-    } else {
-      res.status(httpStatus.SERVICE_UNAVAILABLE);
-      res.json({ status: OFFLINE, reason: reasonText });
-    }
-  });
+  const versions = si.versions()
+    .then(versions => {
+      pingDb((healthCheckFlag, reasonText) => {
+        if (healthCheckFlag) {
+          res.status(httpStatus.OK);
+          res.json({ status: READY, reason: reasonText, versions });
+        } else {
+          res.status(httpStatus.SERVICE_UNAVAILABLE);
+          res.json({ status: OFFLINE, reason: reasonText, versions });
+        }
+      });
+    });
 });
 
 // return REST options metadata

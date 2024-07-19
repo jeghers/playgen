@@ -36,7 +36,7 @@ const initDb = () => {
       log(LOG_LEVEL_ERROR, `Error connecting to DB - ${error}`);
       return;
     }
-    log(LOG_LEVEL_INFO, 'Connection established');
+    log(LOG_LEVEL_INFO, 'DB Connection established');
   });
   // If you're also serving http, display a 503 error.
   db.on('error', error => {
@@ -77,8 +77,7 @@ const initialDataLoad = () => {
     log(LOG_LEVEL_NONE, 'Data received from DB:');
     log(LOG_LEVEL_NONE, rows);
 
-    /* eslint-disable no-warning-comments */
-    if (rows && rows.length) {
+     if (rows && rows.length) {
       for (let i = 0; i < rows.length; i++) {
         // TODO: try to rescue old history on re-connect of DB
         const playlist = initPlaylist(rows[i]);

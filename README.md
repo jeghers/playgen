@@ -629,7 +629,9 @@ To enable this download links feature, the `enabled` parameter must exist
 and be set to true.  `downloadsPath` must also be provided, it can be either
 an absolute or relative path (relative to the "playgen" home directory).
 `IMPORTANT`: be sure the directory given by `downloadsPath` has write permission
-settings such that playgen can create symbolic links there.
+settings such that playgen can create symbolic links there.  In Windows, this
+typically means you might need to give your current user symbolic link permissions
+in your Local Security Policies.
 
 To set the expiration time, you can specify a combination of minutes, hours
 and days.  They will be added together cumulatively to determine the total
@@ -1526,5 +1528,103 @@ _Sample response headers_
 {
     "status": "OK",
     "message": "Download link \"D:\\src\\playgen\\downloads\\song-somePlayList-4-Rats_'N'_Roaches.mp3\" deleted"
+}
+```
+### Health and configuration
+
+#### GET http://somehost:3000/api/v1/healthcheck
+
+* Returns the health status of the service
+
+_Sample response body_
+```
+{
+    "status": "READY",
+    "reason": "All playlists fully loaded"
+}
+```
+
+#### GET http://somehost:3000/api/v1/version
+
+* Returns the version of the services API
+
+_Sample response body_
+```
+{
+    "serverVersion": "1.0.0",
+    "apiVersion": "v1",
+    "message": "1.0.0 is the current playgen server version, v1 is the current API version",
+    "status": "READY"
+}
+```
+
+#### GET http://somehost:3000/api/v1/management/config
+
+* Returns the current configuration of the service (Vault
+  information may or may not be provided, depending on whether
+  or not Vault is being used)
+
+_Sample response body_
+```
+{
+    "serverVersion": "1.0.0",
+    "apiVersion": "v1",
+    "config": {
+        "session": {
+            "port": 9999,
+            "secure": false
+        },
+        "plugins": {
+            "logging": [
+                {
+                    "name": "console",
+                    "params": [
+                        {
+                            "name": "packJson",
+                            "value": false
+                        }
+                    ],
+                    "default": true,
+                    "pluginImpl": {
+                        "name": "console"
+                    }
+                },
+                {
+                    "name": "localFile",
+                    "params": [
+                        {
+                            "name": "fileName",
+                            "value": "d:\\src\\vault-trusted-helper\\vth.log"
+                        },
+                        {
+                            "name": "packJson",
+                            "value": true
+                        }
+                    ],
+                    "pluginImpl": {
+                        "name": "localFile"
+                    }
+                }
+            ]
+        },
+        "tokenRenewals": {
+            "enabled": true,
+            "renewalRecheckIntervalMinutes": 5,
+            "renewalThresholdTimeMinutes": 30,
+            "renewalThresholdTimeHours": 766
+        },
+        "logType": "console",
+        "logLevel": "debug",
+        "healthCheckRetryTime": 5000,
+        "isWindowsService": false,
+        "runMode": "development"
+    },
+    "vaultInfo": {
+        "initialized": true,
+        "sealed": false,
+        "appRole": "approle-helper",
+        "authenticated": true,
+        "availUnsealKeyCount": 5
+    }
 }
 ```

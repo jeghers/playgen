@@ -1,5 +1,4 @@
 
-/* eslint-disable no-warning-comments */
 module.exports = {
   session: {
     port: 3000,

@@ -1,5 +1,4 @@
 
-/* eslint-disable no-warning-comments */
 module.exports = {
   'db.host': 'kv/%VAULT_CLIENT%/playgen/db:host',
   'db.port': 'kv/%VAULT_CLIENT%/playgen/db:port',

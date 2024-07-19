@@ -9,7 +9,7 @@ const { log } = require('./utils');
 const vaultSettings = require('./config/vaultSettings');
 
 const vaultOptions = {
-  apiVersion: 'v1',
+  apiVersion: 'v1', // not yet used?
   endpoint: process.env.VAULT_ADDR,
 };
 

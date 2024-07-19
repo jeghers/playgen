@@ -11,6 +11,7 @@ const config = require('../config');
 const {
   OK,
   ERROR_NOENT,
+  ERROR_EPERM,
   ERROR_EXIST,
   ERROR,
   NOTFOUND,
@@ -40,6 +41,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 // create new download in a given playlist
 // (accessed at POST http://localhost:<port>/api/v1/playlists/:playlist_id/downloads)
 router.post('/', (req, res /* , next */) => {
+  console.warn('**** POST /api/v1/playlists/:playlist_id/downloads - ROUTE AAA');
   log(LOG_LEVEL_INFO, `/api/v1/playlists called with POST url = ${req.url}`);
   if (!downloadsEnabled) {
     handleError(res, httpStatus.SERVICE_UNAVAILABLE, UNAVAILABLE,
@@ -89,6 +91,8 @@ router.post('/', (req, res /* , next */) => {
           let httpStatusCode = httpStatus.CREATED;
           if (returnCode === ERROR_NOENT) {
             httpStatusCode = httpStatus.NO_CONTENT;
+          } else if (returnCode === ERROR_EPERM) {
+            httpStatusCode = httpStatus.FORBIDDEN;
           } else if (returnCode === ERROR_EXIST) {
             httpStatusCode = httpStatus.CONFLICT;
           }
